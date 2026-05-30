@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>דשבורד משפך וובינר מוקלט</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #1a1a2e; direction: rtl; }
+
+  header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: white; padding: 32px 40px; display: flex; align-items: center; justify-content: space-between;
+  }
+  header h1 { font-size: 26px; font-weight: 700; }
+  header p { font-size: 14px; opacity: 0.7; margin-top: 4px; }
+  .badge { background: #e94560; color: white; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+
+  .container { max-width: 1300px; margin: 0 auto; padding: 30px 20px; }
+
+  h2 { font-size: 20px; font-weight: 700; margin-bottom: 18px; color: #1a1a2e; display: flex; align-items: center; gap: 8px; }
+  h2::before { content: ''; display: inline-block; width: 4px; height: 22px; background: #e94560; border-radius: 3px; }
+
+  .section { margin-bottom: 40px; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 14px; margin-bottom: 30px; }
+  .kpi-card {
+    background: white; border-radius: 14px; padding: 20px 18px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07); border-top: 4px solid #e94560;
+    transition: transform 0.2s;
+  }
+  .kpi-card:hover { transform: translateY(-2px); }
+  .kpi-card.blue { border-top-color: #3b82f6; }
+  .kpi-card.green { border-top-color: #10b981; }
+  .kpi-card.orange { border-top-color: #f59e0b; }
+  .kpi-card.purple { border-top-color: #8b5cf6; }
+  .kpi-card.teal { border-top-color: #14b8a6; }
+  .kpi-label { font-size: 12px; color: #6b7280; margin-bottom: 8px; }
+  .kpi-value { font-size: 26px; font-weight: 800; color: #1a1a2e; }
+  .kpi-sub { font-size: 11px; color: #9ca3af; margin-top: 4px; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  @media (max-width: 900px) { .two-col, .three-col { grid-template-columns: 1fr; } }
+
+  .card { background: white; border-radius: 14px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+  .card h3 { font-size: 15px; font-weight: 700; margin-bottom: 16px; color: #374151; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th {
+    background: #f8fafc; padding: 10px 12px; text-align: right;
+    font-weight: 700; color: #374151; border-bottom: 2px solid #e5e7eb; font-size: 11px;
+  }
+  tbody tr { border-bottom: 1px solid #f3f4f6; }
+  tbody tr:hover { background: #fafafa; }
+  tbody td { padding: 10px 12px; color: #374151; }
+  .tag { display: inline-block; padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+  .tag-green { background: #d1fae5; color: #065f46; }
+  .tag-blue { background: #dbeafe; color: #1e40af; }
+  .tag-red { background: #fee2e2; color: #991b1b; }
+  .tag-yellow { background: #fef3c7; color: #92400e; }
+  .tag-gray { background: #f3f4f6; color: #374151; }
+  .tag-purple { background: #ede9fe; color: #5b21b6; }
+
+  .bar-wrap { background: #f3f4f6; border-radius: 10px; height: 8px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 10px; }
+  .bar-green { background: #10b981; }
+  .bar-blue { background: #3b82f6; }
+  .bar-orange { background: #f59e0b; }
+  .bar-red { background: #ef4444; }
+  .bar-purple { background: #8b5cf6; }
+
+  .funnel-step {
+    display: flex; align-items: center; gap: 14px; padding: 14px 18px;
+    background: white; border-radius: 10px; margin-bottom: 8px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06); border-right: 4px solid #e94560;
+  }
+  .funnel-step.s2 { border-right-color: #3b82f6; margin-right: 20px; }
+  .funnel-step.s3 { border-right-color: #10b981; margin-right: 40px; }
+  .funnel-step.s4 { border-right-color: #f59e0b; margin-right: 60px; }
+  .funnel-step.s5 { border-right-color: #8b5cf6; margin-right: 80px; }
+  .funnel-num { font-size: 22px; font-weight: 800; color: #1a1a2e; min-width: 80px; }
+  .funnel-label { font-size: 14px; color: #4b5563; flex: 1; }
+  .funnel-pct { font-size: 13px; font-weight: 700; color: #6b7280; }
+
+  .insight-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .insight-card {
+    background: white; border-radius: 14px; padding: 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07); border-right: 5px solid;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .insight-card.warn { border-right-color: #f59e0b; }
+  .insight-card.good { border-right-color: #10b981; }
+  .insight-card.action { border-right-color: #e94560; }
+  .insight-card.info { border-right-color: #3b82f6; }
+  .insight-icon { font-size: 24px; flex-shrink: 0; }
+  .insight-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; color: #1a1a2e; }
+  .insight-text { font-size: 12.5px; color: #6b7280; line-height: 1.6; }
+
+  .source-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .source-label { min-width: 140px; font-size: 13px; color: #374151; }
+  .source-bar-wrap { flex: 1; background: #f3f4f6; border-radius: 6px; height: 10px; }
+  .source-bar { height: 100%; border-radius: 6px; }
+  .source-count { font-size: 13px; font-weight: 700; color: #1a1a2e; min-width: 50px; text-align: left; }
+  .source-pct { font-size: 12px; color: #9ca3af; min-width: 38px; }
+
+  .month-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 900px) { .month-grid { grid-template-columns: 1fr; } }
+  .month-card { background: white; border-radius: 14px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+  .month-card h3 { font-size: 16px; font-weight: 800; margin-bottom: 14px; color: #1a1a2e; border-bottom: 2px solid #f3f4f6; padding-bottom: 10px; }
+  .month-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f9fafb; font-size: 13px; }
+  .month-row .lbl { color: #6b7280; }
+  .month-row .val { font-weight: 700; color: #1a1a2e; }
+  .profit { color: #10b981 !important; }
+  .sub-section { font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; margin: 10px 0 6px; letter-spacing: 0.5px; }
+
+  .alert-box { padding: 12px 16px; border-radius: 10px; font-size: 13px; margin-top: 12px; line-height: 1.6; }
+  .alert-yellow { background: #fef3c7; color: #78350f; }
+  .alert-green { background: #d1fae5; color: #065f46; }
+  .alert-red { background: #fee2e2; color: #991b1b; }
+  .alert-blue { background: #dbeafe; color: #1e40af; }
+
+  footer { text-align: center; padding: 30px; color: #9ca3af; font-size: 13px; border-top: 1px solid #e5e7eb; margin-top: 20px; background: white; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>📊 דשבורד משפך וובינר מוקלט</h1>
+    <p>נתונים מצטברים · מרץ–מאי 2026 | מבוסס על ניתוח 10,956 רשומות</p>
+  </div>
+  <div class="badge">עדכון: מאי 2026</div>
+</header>
+
+<div class="container">
+
+  <!-- ===== OVERALL KPIs ===== -->
+  <div class="section">
+    <h2>סיכום כללי – 3 חודשים (מרץ–מאי)</h2>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">סה"כ נרשמים (CSV)</div>
+        <div class="kpi-value">10,956</div>
+        <div class="kpi-sub">פבר'–מאי 2026</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">נרשמים מרץ–מאי</div>
+        <div class="kpi-value">9,102</div>
+        <div class="kpi-sub">מרץ 2,907 · אפריל 2,309 · מאי 3,886</div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label">הגיעו לשידור</div>
+        <div class="kpi-value">4,023</div>
+        <div class="kpi-sub">36.7% מהנרשמים (CSV)</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">צפו בהקלטה</div>
+        <div class="kpi-value">3,366</div>
+        <div class="kpi-sub">30.7% מהנרשמים</div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label">סה"כ רכישות</div>
+        <div class="kpi-value">232</div>
+        <div class="kpi-sub">מרץ 71 · אפריל 66 · מאי 95</div>
+      </div>
+      <div class="kpi-card purple">
+        <div class="kpi-label">סה"כ הכנסה</div>
+        <div class="kpi-value">₪430K</div>
+        <div class="kpi-sub">₪119K + ₪118K + ₪193K</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">סה"כ רווח נקי</div>
+        <div class="kpi-value">₪181K</div>
+        <div class="kpi-sub">₪43K + ₪47K + ₪91K</div>
+      </div>
+      <div class="kpi-card teal">
+        <div class="kpi-label">ממוצע CAC</div>
+        <div class="kpi-value">₪600</div>
+        <div class="kpi-sub">מרץ ₪640 → מאי ₪583 ↓</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FUNNEL ===== -->
+  <div class="section">
+    <h2>משפך הוובינר המלא</h2>
+    <div class="two-col">
+      <div>
+        <div class="funnel-step">
+          <div class="funnel-num">10,956</div>
+          <div class="funnel-label">נרשמו לוובינר</div>
+          <div class="funnel-pct">100%</div>
+        </div>
+        <div class="funnel-step s2">
+          <div class="funnel-num">4,023</div>
+          <div class="funnel-label">הגיעו לשידור מוקלט</div>
+          <div class="funnel-pct">36.7%</div>
+        </div>
+        <div class="funnel-step s2" style="margin-right:20px;border-right-color:#60a5fa">
+          <div class="funnel-num">1,533</div>
+          <div class="funnel-label">צפו 75%+ מהוובינר</div>
+          <div class="funnel-pct">38.1% ממשתתפים</div>
+        </div>
+        <div class="funnel-step s3">
+          <div class="funnel-num">480</div>
+          <div class="funnel-label">לחצו על הצעת המכירה בוובינר</div>
+          <div class="funnel-pct">11.9% ממשתתפים</div>
+        </div>
+        <div class="funnel-step s3" style="margin-right:40px;border-right-color:#34d399">
+          <div class="funnel-num">3,366</div>
+          <div class="funnel-label">צפו בהקלטה</div>
+          <div class="funnel-pct">30.7% מהנרשמים</div>
+        </div>
+        <div class="funnel-step s4">
+          <div class="funnel-num">291</div>
+          <div class="funnel-label">לחצו על כפתור ההקלטה</div>
+          <div class="funnel-pct">8.6% מצופי הקלטה</div>
+        </div>
+        <div class="funnel-step s5">
+          <div class="funnel-num">232</div>
+          <div class="funnel-label">רכשו (3 חודשים)</div>
+          <div class="funnel-pct">~2.1% מהנרשמים</div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="card">
+          <h3>📺 מעורבות בשידור מוקלט</h3>
+          <div style="margin-bottom:14px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+              <span style="font-size:13px">השתתפו בצ'אט</span>
+              <span style="font-weight:700;color:#3b82f6">48.5%</span>
+            </div>
+            <div class="bar-wrap"><div class="bar-fill bar-blue" style="width:48.5%"></div></div>
+            <div style="font-size:11px;color:#9ca3af;margin-top:3px">1,952 מתוך 4,023 משתתפים</div>
+          </div>
+          <div style="margin-bottom:14px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+              <span style="font-size:13px">לחצו על הצעת המכירה</span>
+              <span style="font-weight:700;color:#10b981">11.9%</span>
+            </div>
+            <div class="bar-wrap"><div class="bar-fill bar-green" style="width:11.9%"></div></div>
+            <div style="font-size:11px;color:#9ca3af;margin-top:3px">480 לחיצות</div>
+          </div>
+          <div style="margin-bottom:14px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+              <span style="font-size:13px">צפו 75%+ מהוובינר</span>
+              <span style="font-weight:700;color:#f59e0b">38.1%</span>
+            </div>
+            <div class="bar-wrap"><div class="bar-fill bar-orange" style="width:38.1%"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+              <span style="font-size:13px">צפו 50–74%</span>
+              <span style="font-weight:700;color:#8b5cf6">39%</span>
+            </div>
+            <div class="bar-wrap"><div class="bar-fill bar-purple" style="width:39%"></div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>🎬 מי צופה בהקלטה?</h3>
+          <div style="margin-bottom:16px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+              <span style="font-size:13px;color:#374151;">לא הגיעו לשידור (6,933)</span>
+              <span style="font-weight:700;color:#3b82f6">35.2%</span>
+            </div>
+            <div class="bar-wrap"><div class="bar-fill bar-blue" style="width:35.2%"></div></div>
+            <div style="font-size:11px;color:#9ca3af;margin-top:3px">2,442 מתוכם צפו בהקלטה · ממוצע זמן צפייה: 36.9 דק'</div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+              <span style="font-size:13px;color:#374151;">הגיעו לשידור (4,023)</span>
+              <span style="font-weight:700;color:#10b981">23%</span>
+            </div>
+            <div class="bar-wrap"><div class="bar-fill bar-green" style="width:23%"></div></div>
+            <div style="font-size:11px;color:#9ca3af;margin-top:3px">924 חזרו לצפות גם בהקלטה</div>
+          </div>
+          <div class="alert-box alert-yellow" style="margin-top:14px">
+            💡 מי שלא הגיע לשידור צופה בהקלטה <strong>יותר</strong> (35.2% vs 23%).
+            כדאי לייעד sequence נפרד לקהל הזה.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TRAFFIC SOURCES ===== -->
+  <div class="section">
+    <h2>מקורות תנועה</h2>
+    <div class="two-col">
+      <div class="card">
+        <h3>ממומן vs אורגני</h3>
+        <div style="margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+            <span style="font-size:14px;font-weight:700;">ממומן (Paid)</span>
+            <span style="font-size:16px;font-weight:800;color:#e94560;">9,933 — 90.7%</span>
+          </div>
+          <div class="bar-wrap" style="height:14px"><div class="bar-fill" style="width:90.7%;background:#e94560"></div></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+            <span style="font-size:14px;font-weight:700;">אורגני</span>
+            <span style="font-size:16px;font-weight:800;color:#10b981;">1,023 — 9.3%</span>
+          </div>
+          <div class="bar-wrap" style="height:14px"><div class="bar-fill bar-green" style="width:9.3%"></div></div>
+        </div>
+        <div class="alert-box alert-green" style="margin-top:16px">
+          🌱 <strong>הזדמנות גדולה:</strong> 9.3% אורגני בלבד. Reels ואינסטגרם אורגני יכולים להביא לידים ללא עלות פרסום.
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>פירוט מקורות (10,956 נרשמים)</h3>
+        <div class="sub-section">ממומן</div>
+        <div class="source-row">
+          <div class="source-label">📸 Instagram (ממומן)</div>
+          <div class="source-bar-wrap"><div class="source-bar" style="width:55%;background:#e1306c"></div></div>
+          <div class="source-count">5,452</div>
+          <div class="source-pct">49.8%</div>
+        </div>
+        <div class="source-row">
+          <div class="source-label">👍 Facebook (ממומן)</div>
+          <div class="source-bar-wrap"><div class="source-bar" style="width:40%;background:#1877f2"></div></div>
+          <div class="source-count">4,425</div>
+          <div class="source-pct">40.4%</div>
+        </div>
+        <div class="source-row">
+          <div class="source-label">📢 אחר (ממומן)</div>
+          <div class="source-bar-wrap"><div class="source-bar" style="width:1%;background:#9ca3af"></div></div>
+          <div class="source-count">56</div>
+          <div class="source-pct">0.5%</div>
+        </div>
+        <div class="sub-section">אורגני</div>
+        <div class="source-row">
+          <div class="source-label">📸 Instagram (אורגני)</div>
+          <div class="source-bar-wrap"><div class="source-bar" style="width:49%;background:#e1306c;opacity:0.55"></div></div>
+          <div class="source-count">504</div>
+          <div class="source-pct">49.3%</div>
+        </div>
+        <div class="source-row">
+          <div class="source-label">🔗 Direct / לא ידוע</div>
+          <div class="source-bar-wrap"><div class="source-bar" style="width:23%;background:#9ca3af"></div></div>
+          <div class="source-count">239</div>
+          <div class="source-pct">23.4%</div>
+        </div>
+        <div class="source-row">
+          <div class="source-label">👍 Facebook (אורגני)</div>
+          <div class="source-bar-wrap"><div class="source-bar" style="width:22%;background:#1877f2;opacity:0.55"></div></div>
+          <div class="source-count">226</div>
+          <div class="source-pct">22.1%</div>
+        </div>
+        <div class="source-row">
+          <div class="source-label">🔍 Google</div>
+          <div class="source-bar-wrap"><div class="source-bar" style="width:2%;background:#34a853"></div></div>
+          <div class="source-count">19</div>
+          <div class="source-pct">1.9%</div>
+        </div>
+        <div class="source-row">
+          <div class="source-label">💼 LinkedIn</div>
+          <div class="source-bar-wrap"><div class="source-bar" style="width:1%;background:#0077b5"></div></div>
+          <div class="source-count">12</div>
+          <div class="source-pct">1.2%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== WHATSAPP ===== -->
+  <div class="section">
+    <h2>ביצועי הודעות וואטסאפ</h2>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>הודעה</th>
+            <th>תזמון</th>
+            <th>שלח</th>
+            <th>נמסר</th>
+            <th>נקרא</th>
+            <th>% קריאה</th>
+            <th>נכשל</th>
+            <th>בר ביצוע</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td><strong>אישור הרשמה</strong></td>
+            <td><span class="tag tag-blue">מיד אחרי הרשמה</span></td>
+            <td>3,602</td><td>3,534</td><td>2,335</td>
+            <td><strong style="color:#10b981">64.8% 🏆</strong></td>
+            <td>176</td>
+            <td><div class="bar-wrap"><div class="bar-fill bar-green" style="width:64.8%"></div></div></td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><strong>תזכורת – יום לפני</strong></td>
+            <td><span class="tag tag-yellow">יום לפני · 20:30</span></td>
+            <td>2,908</td><td>2,870</td><td>1,876</td>
+            <td><strong style="color:#10b981">61.4%</strong></td>
+            <td>145</td>
+            <td><div class="bar-wrap"><div class="bar-fill bar-green" style="width:61.4%"></div></div></td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td><strong>כניסה לוובינר</strong></td>
+            <td><span class="tag tag-yellow">30 דק' לפני</span></td>
+            <td>3,648</td><td>3,581</td><td>2,264</td>
+            <td><strong style="color:#f59e0b">59.3%</strong></td>
+            <td>167</td>
+            <td><div class="bar-wrap"><div class="bar-fill bar-orange" style="width:59.3%"></div></div></td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td><strong>AI סורק + הטבות</strong></td>
+            <td><span class="tag tag-green">מיד אחרי · לצופי 75%+</span></td>
+            <td>773</td><td>756</td><td>501</td>
+            <td><strong style="color:#10b981">62.3%</strong></td>
+            <td>31</td>
+            <td><div class="bar-wrap"><div class="bar-fill bar-green" style="width:62.3%"></div></div></td>
+          </tr>
+          <tr style="background:#fff7ed">
+            <td>5</td>
+            <td><strong>תזכורת הקלטה 48 שעות ⚠️</strong></td>
+            <td><span class="tag tag-gray">יום אחרי · 20:30</span></td>
+            <td>3,615</td><td>3,530</td><td>1,971</td>
+            <td><strong style="color:#ef4444">52.0% ↓</strong></td>
+            <td>173</td>
+            <td><div class="bar-wrap"><div class="bar-fill bar-red" style="width:52%"></div></div></td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;">
+        <div class="alert-box alert-red">
+          ⚠️ <strong>הכי הרבה הסרות:</strong> הודעה 5 (תזכורת הקלטה 48 שעות) — שיעור הקריאה הנמוך ביותר (52%). הנמענים כבר פחות מעורבים יום אחרי. שנה תזמון או ניסוח.
+        </div>
+        <div class="alert-box alert-green">
+          🏆 <strong>הכי גבוה:</strong> הודעה 1 (64.8%) — רגע המוטיבציה הגבוהה ביותר. מנף אותו עם תוכן נוסף מיד אחרי ההרשמה.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== EMAILS ===== -->
+  <div class="section">
+    <h2>ביצועי מיילים</h2>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>מייל</th>
+            <th>תזמון</th>
+            <th>נשלח</th>
+            <th>% פתיחה</th>
+            <th>% קליק</th>
+            <th>הסרות</th>
+            <th>בר פתיחה</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>0</td>
+            <td><strong>אישור הרשמה</strong></td>
+            <td><span class="tag tag-blue">מיד</span></td>
+            <td>11,006</td>
+            <td>48%</td><td>6%</td><td>86</td>
+            <td><div class="bar-wrap"><div class="bar-fill bar-blue" style="width:48%"></div></div></td>
+          </tr>
+          <tr style="background:#f0fdf4">
+            <td>1</td>
+            <td><strong>שאלות – יום לפני 🏆</strong></td>
+            <td><span class="tag tag-yellow">יום לפני · 8:30</span></td>
+            <td>8,355</td>
+            <td><strong style="color:#10b981">55% ↑</strong></td>
+            <td><strong style="color:#10b981">13% ↑</strong></td>
+            <td>77</td>
+            <td><div class="bar-wrap"><div class="bar-fill bar-green" style="width:55%"></div></div></td>
+          </tr>
+          <tr style="background:#fff7ed">
+            <td>2</td>
+            <td><strong>נתראה ב-20:30 ⚠️</strong></td>
+            <td><span class="tag tag-yellow">דקות לפני</span></td>
+            <td>9,827</td>
+            <td><strong style="color:#ef4444">39% ↓</strong></td>
+            <td>7%</td>
+            <td><strong style="color:#ef4444">199</strong></td>
+            <td><div class="bar-wrap"><div class="bar-fill bar-red" style="width:39%"></div></div></td>
+          </tr>
+          <tr style="background:#f0fdf4">
+            <td>3</td>
+            <td><strong>הנה ההקלטה 🏆</strong></td>
+            <td><span class="tag tag-green">מיד אחרי</span></td>
+            <td>9,693</td>
+            <td><strong style="color:#10b981">55% ↑</strong></td>
+            <td><strong style="color:#10b981">11% ↑</strong></td>
+            <td>116</td>
+            <td><div class="bar-wrap"><div class="bar-fill bar-green" style="width:55%"></div></div></td>
+          </tr>
+          <tr style="background:#f9fafb">
+            <td>4</td>
+            <td><strong>30 דק' אחרי – 8020</strong></td>
+            <td><span class="tag tag-gray">כבוי</span></td>
+            <td>—</td><td>—</td><td>—</td><td>—</td>
+            <td><span style="color:#9ca3af;font-size:12px">לא פעיל</span></td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td><strong>יום אחרי</strong></td>
+            <td><span class="tag tag-gray">יום אחרי · 8:30</span></td>
+            <td>9,405</td>
+            <td>47%</td><td>6%</td><td>194</td>
+            <td><div class="bar-wrap"><div class="bar-fill bar-blue" style="width:47%"></div></div></td>
+          </tr>
+          <tr style="background:#fff7ed">
+            <td>6</td>
+            <td><strong>יומיים אחרי ⚠️</strong></td>
+            <td><span class="tag tag-gray">יום 2 · 8:30</span></td>
+            <td>9,223</td>
+            <td>50%</td>
+            <td><strong style="color:#ef4444">4% ↓</strong></td>
+            <td><strong style="color:#ef4444">281 ↑↑</strong></td>
+            <td><div class="bar-wrap"><div class="bar-fill bar-orange" style="width:50%"></div></div></td>
+          </tr>
+          <tr>
+            <td>7</td>
+            <td><strong>הזדמנות אחרונה – יום 3</strong></td>
+            <td><span class="tag tag-gray">יום 3 · 8:30</span></td>
+            <td>8,706</td>
+            <td>49%</td><td>8%</td><td>221</td>
+            <td><div class="bar-wrap"><div class="bar-fill bar-blue" style="width:49%"></div></div></td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-top:14px;">
+        <div class="alert-box alert-green">🏆 <strong>הכי הרבה פתיחות:</strong><br>מייל 1 + מייל 3 (55%)</div>
+        <div class="alert-box alert-green">🖱️ <strong>הכי הרבה קליקים:</strong><br>מייל 1 (13%) — יום לפני</div>
+        <div class="alert-box alert-red">⚠️ <strong>הכי הרבה הסרות:</strong><br>מייל 6 (281) — יומיים אחרי</div>
+        <div class="alert-box alert-yellow">⚠️ <strong>הכי פחות פתיחות:</strong><br>מייל 2 (39%) — שנה כותרת!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MONTHLY FINANCIALS ===== -->
+  <div class="section">
+    <h2>נתונים פיננסיים חודשיים</h2>
+    <div class="month-grid">
+
+      <div class="month-card" style="border-top:4px solid #3b82f6">
+        <h3>📅 מרץ 2026</h3>
+        <div class="sub-section">📺 ביצועי וובינר מוקלט</div>
+        <div class="month-row"><span class="lbl">נרשמים</span><span class="val">2,907</span></div>
+        <div class="month-row"><span class="lbl">משתתפים</span><span class="val">969 (33%)</span></div>
+        <div class="month-row"><span class="lbl">רכישות מהוובינר</span><span class="val">63</span></div>
+        <div class="month-row"><span class="lbl">המרה ממשתתפים (מהוובינר)</span><span class="val">6.5%</span></div>
+        <div class="month-row"><span class="lbl">המרה כוללת (כולל פוסט)</span><span class="val"><strong style="color:#10b981">7.3%</strong></span></div>
+        <div class="month-row"><span class="lbl">הכנסה מהוובינר</span><span class="val">₪106,243</span></div>
+        <div class="sub-section">💰 סה"כ חודשי (כולל הקלטה ושיחות)</div>
+        <div class="month-row"><span class="lbl">רכישות מהקלטה</span><span class="val">+8</span></div>
+        <div class="month-row"><span class="lbl">סה"כ רכישות</span><span class="val"><strong>71</strong></span></div>
+        <div class="month-row"><span class="lbl">סה"כ הכנסה</span><span class="val">₪119,734</span></div>
+        <div class="month-row"><span class="lbl">עלות קמפיין</span><span class="val">₪40,105</span></div>
+        <div class="month-row"><span class="lbl">עלות פלטפורמות</span><span class="val">₪4,226</span></div>
+        <div class="month-row"><span class="lbl">עלות תפעול</span><span class="val">₪31,350</span></div>
+        <div class="month-row" style="border-top:2px solid #e5e7eb;margin-top:6px;padding-top:10px">
+          <span class="lbl"><strong>רווח נקי</strong></span>
+          <span class="val profit"><strong>₪42,915</strong></span>
+        </div>
+        <div class="month-row"><span class="lbl">CAC</span><span class="val">₪640</span></div>
+      </div>
+
+      <div class="month-card" style="border-top:4px solid #10b981">
+        <h3>📅 אפריל 2026</h3>
+        <div class="sub-section">📺 ביצועי וובינר מוקלט</div>
+        <div class="month-row"><span class="lbl">נרשמים</span><span class="val">2,309</span></div>
+        <div class="month-row"><span class="lbl">משתתפים</span><span class="val">914 (40%)</span></div>
+        <div class="month-row"><span class="lbl">רכישות מהוובינר</span><span class="val">56</span></div>
+        <div class="month-row"><span class="lbl">המרה ממשתתפים (מהוובינר)</span><span class="val">6.1%</span></div>
+        <div class="month-row"><span class="lbl">המרה כוללת (כולל פוסט)</span><span class="val"><strong style="color:#10b981">7.2%</strong></span></div>
+        <div class="month-row"><span class="lbl">הכנסה מהוובינר</span><span class="val">₪101,008</span></div>
+        <div class="sub-section">💰 סה"כ חודשי (כולל הקלטה ושיחות)</div>
+        <div class="month-row"><span class="lbl">רכישות מהקלטה</span><span class="val">+5</span></div>
+        <div class="month-row"><span class="lbl">רכישות משיחות מכירה</span><span class="val">+3</span></div>
+        <div class="month-row"><span class="lbl">רכישות מחוץ לוובינר</span><span class="val">+2</span></div>
+        <div class="month-row"><span class="lbl">סה"כ רכישות</span><span class="val"><strong>66</strong></span></div>
+        <div class="month-row"><span class="lbl">סה"כ הכנסה</span><span class="val">₪117,872</span></div>
+        <div class="month-row"><span class="lbl">עלות קמפיין</span><span class="val">₪36,860</span></div>
+        <div class="month-row"><span class="lbl">עלות פלטפורמות</span><span class="val">₪3,037</span></div>
+        <div class="month-row"><span class="lbl">עלות תפעול</span><span class="val">₪29,700</span></div>
+        <div class="month-row" style="border-top:2px solid #e5e7eb;margin-top:6px;padding-top:10px">
+          <span class="lbl"><strong>רווח נקי</strong></span>
+          <span class="val profit"><strong>₪47,136</strong></span>
+        </div>
+        <div class="month-row"><span class="lbl">CAC</span><span class="val">₪576</span></div>
+      </div>
+
+      <div class="month-card" style="border-top:4px solid #e94560">
+        <h3>📅 מאי 2026 🔝 <span style="font-size:11px;color:#9ca3af;font-weight:400">(מעודכן)</span></h3>
+        <div class="sub-section">📺 ביצועי וובינר מוקלט</div>
+        <div class="month-row"><span class="lbl">נרשמים</span><span class="val">3,886</span></div>
+        <div class="month-row"><span class="lbl">משתתפים</span><span class="val">1,516 (39%)</span></div>
+        <div class="month-row"><span class="lbl">רכישות מהוובינר</span><span class="val">74</span></div>
+        <div class="month-row"><span class="lbl">המרה ממשתתפים (מהוובינר)</span><span class="val">4.9%</span></div>
+        <div class="month-row"><span class="lbl">המרה כוללת (כולל פוסט)</span><span class="val"><strong style="color:#10b981">6.3%</strong></span></div>
+        <div class="month-row"><span class="lbl">הכנסה מהוובינר</span><span class="val">₪149,627</span></div>
+        <div class="sub-section">💰 סה"כ חודשי (כולל הקלטה ושיחות)</div>
+        <div class="month-row"><span class="lbl">רכישות מהקלטה</span><span class="val">+7 <span style="font-size:11px;color:#10b981">(+2 חדשות)</span></span></div>
+        <div class="month-row"><span class="lbl">רכישות משיחות מכירה</span><span class="val">+8</span></div>
+        <div class="month-row"><span class="lbl">רכישות מחוץ לוובינר</span><span class="val">+8</span></div>
+        <div class="month-row"><span class="lbl">סה"כ רכישות</span><span class="val"><strong>97</strong> <span style="font-size:11px;color:#10b981">(עודכן)</span></span></div>
+        <div class="month-row"><span class="lbl">סה"כ הכנסה</span><span class="val">₪198,092 <span style="font-size:11px;color:#10b981">(+₪5,380)</span></span></div>
+        <div class="month-row"><span class="lbl">עמלת סליקה</span><span class="val">₪1,831</span></div>
+        <div class="month-row"><span class="lbl">עמלה EZ</span><span class="val">₪6,320</span></div>
+        <div class="month-row"><span class="lbl">עלות קמפיין</span><span class="val">₪58,977</span></div>
+        <div class="month-row"><span class="lbl">עלות פלטפורמות</span><span class="val">₪4,295</span></div>
+        <div class="month-row"><span class="lbl">עלות תפעול</span><span class="val">₪42,750</span></div>
+        <div class="month-row" style="border-top:2px solid #e5e7eb;margin-top:6px;padding-top:10px">
+          <span class="lbl"><strong>רווח נקי</strong></span>
+          <span class="val profit"><strong>₪78,939</strong></span>
+        </div>
+        <div class="month-row"><span class="lbl">CAC (סה"כ)</span><span class="val">₪707</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== PRICE CHANGE ANALYSIS ===== -->
+  <div class="section">
+    <h2>🔴 ניתוח השפעת עליית המחיר מ-₪2,240 ל-₪2,690 (מ-18.5.26)</h2>
+
+    <div style="padding:14px 18px;background:#eff6ff;border-right:4px solid #3b82f6;border-radius:12px;margin-bottom:20px;font-size:13px;color:#1e3a5f">
+      💡 <strong>הנחת העבודה:</strong> ההקלטה החדשה היא חלק מהצגת המחיר החדשה — לכן הפוקוס הוא על <strong>השפעת המחיר</strong>.
+    </div>
+
+    <div class="two-col" style="margin-bottom:20px">
+      <div class="card" style="border-top:4px solid #3b82f6">
+        <h3>📅 לפני 18/5 — הקלטה ישנה + ₪2,240</h3>
+        <div class="month-row"><span class="lbl">וובינרים</span><span class="val">1–4 (4.5 – 13.5)</span></div>
+        <div class="month-row"><span class="lbl">נרשמים</span><span class="val">2,156</span></div>
+        <div class="month-row"><span class="lbl">משתתפים</span><span class="val">868</span></div>
+        <div class="month-row"><span class="lbl">רכישות</span><span class="val">47</span></div>
+        <div class="month-row" style="border-top:2px solid #e5e7eb;margin-top:6px;padding-top:8px">
+          <span class="lbl"><strong>% המרה</strong></span>
+          <span class="val" style="color:#10b981;font-size:20px"><strong>5.41%</strong></span>
+        </div>
+        <div class="month-row"><span class="lbl">הכנסה</span><span class="val">₪105,280</span></div>
+        <div class="month-row"><span class="lbl">הכנסה למשתתף</span><span class="val"><strong>₪121</strong></span></div>
+      </div>
+
+      <div class="card" style="border-top:4px solid #ef4444">
+        <h3>📅 מ-18/5 — הקלטה חדשה + ₪2,690</h3>
+        <div class="month-row"><span class="lbl">וובינרים</span><span class="val">5–8 (18.5 – 28.5)</span></div>
+        <div class="month-row"><span class="lbl">נרשמים</span><span class="val">1,730</span></div>
+        <div class="month-row"><span class="lbl">משתתפים</span><span class="val">648</span></div>
+        <div class="month-row"><span class="lbl">רכישות</span><span class="val">24</span></div>
+        <div class="month-row" style="border-top:2px solid #e5e7eb;margin-top:6px;padding-top:8px">
+          <span class="lbl"><strong>% המרה</strong></span>
+          <span class="val" style="color:#ef4444;font-size:20px"><strong>3.70% ↓</strong></span>
+        </div>
+        <div class="month-row"><span class="lbl">הכנסה</span><span class="val">₪64,560</span></div>
+        <div class="month-row"><span class="lbl">הכנסה למשתתף</span><span class="val"><strong style="color:#ef4444">₪100 ↓</strong></span></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px">
+      <h3>📊 ניתוח השינוי — מה שהנתונים אומרים</h3>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px">
+        <div style="text-align:center;padding:16px;background:#fef2f2;border-radius:10px">
+          <div style="font-size:11px;color:#6b7280;margin-bottom:4px">עליית מחיר</div>
+          <div style="font-size:26px;font-weight:800;color:#ef4444">+20.1%</div>
+          <div style="font-size:11px;color:#9ca3af">₪2,240 → ₪2,690</div>
+        </div>
+        <div style="text-align:center;padding:16px;background:#fef2f2;border-radius:10px">
+          <div style="font-size:11px;color:#6b7280;margin-bottom:4px">ירידת המרה</div>
+          <div style="font-size:26px;font-weight:800;color:#ef4444">-31.6%</div>
+          <div style="font-size:11px;color:#9ca3af">5.41% → 3.70%</div>
+        </div>
+        <div style="text-align:center;padding:16px;background:#fef2f2;border-radius:10px">
+          <div style="font-size:11px;color:#6b7280;margin-bottom:4px">ירידת הכנסה/משתתף</div>
+          <div style="font-size:26px;font-weight:800;color:#ef4444">-₪21</div>
+          <div style="font-size:11px;color:#9ca3af">₪121 → ₪100</div>
+        </div>
+        <div style="text-align:center;padding:16px;background:#fff7ed;border-radius:10px">
+          <div style="font-size:11px;color:#6b7280;margin-bottom:4px">אלסטיציות מחיר</div>
+          <div style="font-size:26px;font-weight:800;color:#f59e0b">-1.57</div>
+          <div style="font-size:11px;color:#9ca3af">ביקוש גמיש מאוד</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="alert-box alert-red">
+          💸 <strong>What-If: אם שמרנו ₪2,240 אחרי 18/5</strong><br><br>
+          648 משתתפים × 5.41% = 35 רכישות × ₪2,240 = <strong>₪78,400</strong><br>
+          בפועל: 24 × ₪2,690 = <strong>₪64,560</strong><br>
+          <strong style="color:#ef4444">הפרש: ₪13,840 לטובת המחיר הישן</strong>
+        </div>
+        <div class="alert-box alert-yellow">
+          🎯 <strong>מה ה"Sweet Spot"?</strong><br><br>
+          אלסטיציות -1.57 (>1) = ביקוש גמיש. כלומר עלייה במחיר פוגעת בהכנסה יותר ממה שהיא מוסיפה.
+          <strong>הנתונים מצביעים שהמחיר ₪2,240 הניב הכנסה גבוהה יותר למשתתף.</strong>
+          מחיר ביניים מוצע לבדיקה: <strong>₪2,450–₪2,490</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🎯 ניתוח תמחור — Sweet Spot (מבוסס אלסטיציות -1.57)</h3>
+      <p style="font-size:12px;color:#6b7280;margin-bottom:14px">
+        מודל: C(P) = 5.41% × (P ÷ 2,240)^(−1.57) | הכנסה למשתתף = מחיר × אחוז המרה
+      </p>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>מחיר לתוכנית</th>
+              <th>% המרה משוער</th>
+              <th>הכנסה למשתתף</th>
+              <th>על 600 משתתפים</th>
+              <th>על 900 משתתפים</th>
+              <th>הערכה</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background:#d1fae5">
+              <td><strong>₪1,990</strong></td>
+              <td><strong style="color:#10b981">6.51%</strong></td>
+              <td><strong>₪130</strong></td>
+              <td>₪77,900</td>
+              <td>₪116,900</td>
+              <td><span class="tag tag-green">הכנסה גבוהה, קנייה קלה</span></td>
+            </tr>
+            <tr style="background:#ecfdf5">
+              <td><strong>₪2,100</strong></td>
+              <td><strong style="color:#10b981">5.99%</strong></td>
+              <td><strong>₪126</strong></td>
+              <td>₪75,400</td>
+              <td>₪113,100</td>
+              <td><span class="tag tag-green">מאוזן מאוד</span></td>
+            </tr>
+            <tr style="background:#fff7ed;border:2px solid #f59e0b">
+              <td><strong>₪2,240</strong> ⭐ ישן</td>
+              <td><strong style="color:#10b981">5.41%</strong></td>
+              <td><strong>₪121</strong></td>
+              <td>₪72,700</td>
+              <td>₪109,000</td>
+              <td><span class="tag tag-yellow">מוכח – המחיר הישן</span></td>
+            </tr>
+            <tr>
+              <td><strong>₪2,490</strong></td>
+              <td style="color:#f59e0b">4.58%</td>
+              <td>₪114</td>
+              <td>₪68,400</td>
+              <td>₪102,600</td>
+              <td><span class="tag tag-yellow">פחות אופטימלי</span></td>
+            </tr>
+            <tr style="background:#fef2f2">
+              <td><strong>₪2,690</strong> ❌ נוכחי</td>
+              <td style="color:#ef4444"><strong>3.70%</strong> (בפועל)</td>
+              <td style="color:#ef4444">₪100</td>
+              <td style="color:#ef4444">₪59,600</td>
+              <td style="color:#ef4444">₪89,400</td>
+              <td><span class="tag tag-red">הנמוך ביותר</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px">
+        <div class="alert-box" style="background:#d1fae5;color:#065f46">
+          ⭐ <strong>המלצה: ₪2,100–₪2,240</strong><br><br>
+          ₪2,100 מייצר <strong>הכנסה גבוהה יותר</strong> מ-₪2,690 בכל תרחיש.
+          על 600 משתתפים — הפרש של <strong>₪15,800</strong> לטובת ₪2,100.
+          הורד את המחיר לטווח הזה לפחות ל-5 וובינרים ומדוד.
+        </div>
+        <div class="alert-box alert-yellow">
+          🧪 <strong>תוכנית בדיקה מוצעת:</strong><br><br>
+          <strong>שלב 1:</strong> 3 וובינרים ב-₪2,240 (benchmark ידוע)<br>
+          <strong>שלב 2:</strong> 3 וובינרים ב-₪2,100<br>
+          <strong>שלב 3:</strong> השווה הכנסה למשתתף — כך תמצא את ה-Sweet Spot האמיתי
+        </div>
+      </div>
+      <div class="alert-box alert-red" style="margin-top:12px">
+        ⚠️ <strong>מדגם קטן — הסתייגות חשובה:</strong> הניתוח מבוסס על 4 וובינרים לפני ו-4 אחרי. צריך 6-8 וובינרים בכל מחיר לתוצאות מהימנות. השתמש בנתונים כ<strong>כיוון</strong>, לא כעובדה חלוטה.
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CONVERSION RATES ===== -->
+  <div class="section">
+    <h2>📊 אחוזי המרה – מהוובינר vs כולל (מטרה: 7%)</h2>
+    <div class="card" style="margin-bottom:20px">
+      <h3>השוואת המרה חודשית — מהוובינר בלבד מול סה"כ כולל הקלטה + שיחות מכירה</h3>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>חודש</th>
+              <th>נרשמים</th>
+              <th>משתתפים</th>
+              <th>רכישות מהוובינר</th>
+              <th>% המרה מהוובינר</th>
+              <th>סה"כ רכישות</th>
+              <th>% המרה כוללת</th>
+              <th>יעד 7%</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>מרץ 2026</strong></td>
+              <td>2,907</td><td>969</td><td>63</td>
+              <td>6.5%</td>
+              <td>71</td>
+              <td><strong style="color:#10b981">7.3% ✅</strong></td>
+              <td><span class="tag tag-green">עמד ביעד</span></td>
+            </tr>
+            <tr>
+              <td><strong>אפריל 2026</strong></td>
+              <td>2,309</td><td>914</td><td>56</td>
+              <td>6.1%</td>
+              <td>66</td>
+              <td><strong style="color:#10b981">7.2% ✅</strong></td>
+              <td><span class="tag tag-green">עמד ביעד</span></td>
+            </tr>
+            <tr style="background:#fff7ed">
+              <td><strong>מאי 2026</strong></td>
+              <td>3,886</td><td>1,516</td><td>74</td>
+              <td>4.9%</td>
+              <td>97</td>
+              <td><strong style="color:#f59e0b">6.4% ⚠️</strong></td>
+              <td><span class="tag tag-yellow">חסרים 10 רכישות</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px">
+        <div class="alert-box alert-yellow">
+          💡 <strong>מסקנה חשובה:</strong> ההמרה הכוללת (כולל הקלטה + שיחות) עמדה ב-7%+ במרץ ואפריל.
+          מאי ירד ל-6.3% — בעיקר כי גדל מספר הנרשמים אך לא גדל מספיק מספר שיחות המכירה והמעקב.
+        </div>
+        <div class="alert-box alert-blue">
+          🎯 <strong>להגיע ל-7% במאי:</strong> היינו צריכים 106 רכישות (במקום 95).
+          כלומר — 11 רכישות נוספות. זה אפשרי עם שיפור במסרי הפוסט-וובינר ועוד שיחות מכירה.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== EXPERT RECOMMENDATIONS ===== -->
+  <div class="section">
+    <h2>🧠 המלצות מומחים לשיפור המרה מ-5% ל-7%+</h2>
+    <div style="margin-bottom:14px;padding:14px 18px;background:#ede9fe;border-radius:12px;font-size:13px;color:#4c1d95">
+      <strong>מקורות:</strong> Jason Fladlien ("The $100M Webinar Man"), Russell Brunson (ClickFunnels), Amy Porterfield, Joel Erway, Jon Benson — מומחי ווביינר המובילים בעולם.
+    </div>
+    <div class="insight-grid">
+
+      <div class="insight-card action">
+        <div class="insight-icon">🎯</div>
+        <div>
+          <div class="insight-title">Jason Fladlien: חזק את ה-Offer Stack</div>
+          <div class="insight-text">
+            Fladlien: "הסיבה שאנשים לא קונים היא לא המחיר — זה שהם לא מרגישים שהם מקבלים מספיק". הוסף 2-3 בונוסים ייחודיים עם ערך נתפס גבוה (כלים, גישה לקהילה, מפגש 1:1). הצג את הבונוסים <strong>לפני</strong> הצגת המחיר.
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-card action">
+        <div class="insight-icon">🧱</div>
+        <div>
+          <div class="insight-title">Russell Brunson: "The Big Domino" — שנה אמונה אחת</div>
+          <div class="insight-text">
+            Brunson: כל הוובינר צריך להפיל "דומינו" אחד — אמונה שמונעת רכישה. לפני שמוכרים, שאל: מה הסיבה #1 שאנשים לא קונים? ("אני לא יודע לחפש עבודה") — ואז בנה את כל הוובינר סביב שבירת האמונה הזו.
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-card action">
+        <div class="insight-icon">⏰</div>
+        <div>
+          <div class="insight-title">הוסף Urgency אמיתית בסגירה</div>
+          <div class="insight-text">
+            מומחים: ה-Close חייב להכיל 3 אלמנטים: <strong>(1)</strong> סיבה לפעול עכשיו (מחיר עולה / מקומות מוגבלים), <strong>(2)</strong> מה הם מפסידים כל יום שלא פועלים, <strong>(3)</strong> סיפור לקוח שפעל ושינה מצב. כעת יש לך 480 לחיצות — מי מהם עדיין לא קנה? תמקד שם שיחות מכירה.
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-card info">
+        <div class="insight-icon">💬</div>
+        <div>
+          <div class="insight-title">Amy Porterfield: הוסף מסר נוסף לפני הוובינר</div>
+          <div class="insight-text">
+            Porterfield ממליצה על <strong>"Pre-Webinar Primer"</strong> — מסר (WA/מייל) שנשלח 2-3 ימים לפני עם תוכן קצר שמכין מנטלית: "לפני שנפגש, תשאל את עצמך X". זה מגדיל נוכחות ב-15-20% ואת איכות המשתתפים. אצלנו: שוב — הוסף הודעת WA <strong>48 שעות לפני</strong>.
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-card info">
+        <div class="insight-icon">📞</div>
+        <div>
+          <div class="insight-title">נצל את 480 הלוחצים — שיחות מכירה</div>
+          <div class="insight-text">
+            480 אנשים לחצו על הצעת המכירה בוובינר אך לא רכשו. זהו קהל ה-HOT LEADS שלך. שלח להם sequence ייעודי (WA + מייל) עם הצעה לשיחת ייעוץ קצרה. בהינתן המחיר, המרה של 10% מהם = 48 רכישות נוספות.
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-card info">
+        <div class="insight-icon">🎬</div>
+        <div>
+          <div class="insight-title">Joel Erway: קצר את הוובינר, חזק את הסגירה</div>
+          <div class="insight-text">
+            Erway: "וובינרים ארוכים מדי מרגיעים את הקהל — אל תדלל את המסר". 77% מהמשתתפים שלך צופים 50%+ (נהדר). בדוק אם הסגירה מגיעה מוקדם מספיק — אם ה-pitch מגיע אחרי שעה, הוסף mini-pitch ב-30 דקות.
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-card good">
+        <div class="insight-icon">🔁</div>
+        <div>
+          <div class="insight-title">הוסף Replay Sequence ייעודי לצופי הקלטה</div>
+          <div class="insight-text">
+            3,366 צפו בהקלטה, ממוצע 36.9 דקות. כלומר הם מחוברים! שלח להם מסר ייחודי שאומר: "ראיתי שצפית בהקלטה — יש לי הצעה שאני מציע רק לצופי הקלטה לזמן מוגבל". זה אחד הטריקים הכי אפקטיביים של Brunson.
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-card good">
+        <div class="insight-icon">📊</div>
+        <div>
+          <div class="insight-title">A/B Test: שעת הוובינר</div>
+          <div class="insight-text">
+            אחוז ההגעה הממוצע הוא 36-40%. נסה וובינר ב-<strong>12:00 בצהריים</strong> (כבר נבדק במאי עם 642 נרשמים) ומדוד אם אחוז ההגעה שונה. יום ושעה שונים יכולים להשפיע ב-5-15% על אחוז ההגעה ובהתאם על ההמרה.
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-card good">
+        <div class="insight-icon">✉️</div>
+        <div>
+          <div class="insight-title">הפעל מחדש מייל 4 (30 דקות אחרי)</div>
+          <div class="insight-text">
+            זהו ה"חלון הזהב" — 30 דקות אחרי הוובינר הרגש בשיא. מייל קצר עם CTA אחד: "יש לך 2 שעות לנצל את המחיר המיוחד של הערב". הדבר הזה לבד יכול להוסיף 3-5 רכישות לוובינר.
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-card warn">
+        <div class="insight-icon">🎁</div>
+        <div>
+          <div class="insight-title">הוסף הצעת DownSell לאחר 3 ימים</div>
+          <div class="insight-text">
+            למי שלא קנה אחרי 3 ימי FollowUp — הצע גרסה מוקטנת (מודול אחד / גישה לחודש / שיחה אחת). אנשים שלא קנו לא בהכרח לא מעוניינים — לפעמים זה עניין של מחיר. DownSell של 30% מהמחיר יכול להמיר 2-4% נוספים.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== INSIGHTS ===== -->
+  <div class="section">
+    <h2>תובנות והמלצות לשיפור המשפך</h2>
+    <div class="insight-grid">
+
+      <div class="insight-card action">
+        <div class="insight-icon">📉</div>
+        <div>
+          <div class="insight-title">63% מהנרשמים לא מגיעים לשידור</div>
+          <div class="insight-text">
+            זו ההזדמנות הגדולה ביותר לשיפור. הוסף הודעת WA נוספת <strong>2 שעות לפני</strong> השידור עם hook חזק ("מה תפספסו אם לא תגיעו"). גם SMS יכול לעזור בשלב הזה.
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-card warn">
+        <div class="insight-icon">⚠️</div>
+        <div>
+          <div class="insight-title">מייל 2 – פתיחה הכי נמוכה (39%) + 199 הסרות</div>
+          <div class="insight-text">
+            מייל "נתראה ב-20:30" נשלח דקות לפני ואנשים עמוסים. שנה כותרת נושא לכזו שמדגישה ערך ("דבר אחד שתלמד הערב שישנה את החיפוש שלך") במקום לוגיסטיקה.
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-card good">
+        <div class="insight-icon">🏆</div>
+        <div>
+          <div class="insight-title">מייל 1: 55% פתיחה + 13% קליקים – הכי טוב</div>
+          <div class="insight-text">
+            מייל "שאלות יום לפני" עובד כי הוא יוצר מחויבות אישית. שכפל את הפורמט הזה — שאלה אינטראקטיבית — גם בהודעות ה-FollowUp אחרי הוובינר כדי לשמור על המעורבות.
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-card action">
+        <div class="insight-icon">🗑️</div>
+        <div>
+          <div class="insight-title">מייל 6 (יומיים אחרי) – 281 הסרות, 4% קליק בלבד</div>
+          <div class="insight-text">
+            זהו המייל המזיק ביותר. שנה לתוכן ייחודי שלא היה בוובינר ("בונוס בלעדי") או הקצר את הרצף ל-2 מיילים בלבד אחרי הוובינר ובדוק את ה-ROI.
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-card info">
+        <div class="insight-icon">📱</div>
+        <div>
+          <div class="insight-title">WA 5 (48 שעות) – הכי הרבה הסרות בוואטסאפ (52% קריאה)</div>
+          <div class="insight-text">
+            הודעת "48 שעות" נשלחת ב-20:30 אחרי יום שלם — קהל עייף. נסה לשלוח ב-<strong>10:00 בבוקר</strong> של היום שלמחרת כשהלידים רעננים, ועם hook אחר ("שעות אחרונות לצפות").
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-card info">
+        <div class="insight-icon">🎬</div>
+        <div>
+          <div class="insight-title">35% מהנרשמים שלא הגיעו צופים בהקלטה</div>
+          <div class="insight-text">
+            קהל חמים שמחכה להזדמנות. צור sequence ייעודי עבורם — הודעת WA + מייל עם כותרת שונה: "לא הגעת? הנה מה שכולם מדברים עליו אחרי הוובינר". ממוצע זמן צפייה בהקלטה: <strong>36.9 דק'</strong>.
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-card warn">
+        <div class="insight-icon">📈</div>
+        <div>
+          <div class="insight-title">המרה יורדת עם גידול בנרשמים (מרץ 7% → מאי 5%)</div>
+          <div class="insight-text">
+            ככל שמביאים יותר נרשמים, האיכות יורדת. בדוק את אחוז ההמרה לפי מקור (Instagram vs Facebook) ושים תקציב יותר על המקור שמייצר קונים — לא רק לידים זולים.
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-card action">
+        <div class="insight-icon">🔄</div>
+        <div>
+          <div class="insight-title">הפעל מחדש את מייל 4 (30 דקות אחרי הוובינר)</div>
+          <div class="insight-text">
+            מייל "30 דקות אחרי" כרגע כבוי לחלוטין. זהו timing קריטי — הרגש גבוה. נסה גרסה קצרה עם CTA אחד ברור (שיחת מכירה / קניה ישירה) ומדוד את ההשפעה על ה-ROI.
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-card good">
+        <div class="insight-icon">💬</div>
+        <div>
+          <div class="insight-title">48.5% מהמשתתפים פעילים בצ'אט – נצל את זה</div>
+          <div class="insight-text">
+            כמעט מחצית מהמשתתפים שולחים בצ'אט — הם מעורבים! שלח להם הודעת WA ייעודית מיד אחרי הוובינר עם "ראיתי שהיית פעיל הערב — יש לי משהו מיוחד עבורך" לשיפור ה-close rate.
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-card good">
+        <div class="insight-icon">🌱</div>
+        <div>
+          <div class="insight-title">אורגני 9.3% בלבד – פוטנציאל גדול לחיסכון</div>
+          <div class="insight-text">
+            Instagram אורגני מביא 504 נרשמים ללא עלות. השקעה שבועית ב-2-3 Reels על נושאי חיפוש עבודה יכולה להגדיל את האורגני ל-20%+ ולהוריד את ה-CAC מ-₪600 ל-₪450.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  דשבורד וובינר MentMe · מרץ–מאי 2026 · 10,956 נרשמים · הופק בעזרת Claude
+</footer>
+
+</body>
+</html>
