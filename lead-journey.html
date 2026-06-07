@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מסע הליד — MentMe</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f0f1a; color: #e2e8f0; direction: rtl; }
+
+/* NAV */
+nav {
+  background: #1a1a2e; padding: 14px 40px; display: flex; align-items: center; gap: 16px;
+  border-bottom: 1px solid #2d2d44;
+}
+nav a {
+  color: #94a3b8; text-decoration: none; padding: 8px 18px; border-radius: 8px;
+  font-size: 14px; font-weight: 600; transition: all 0.2s;
+}
+nav a:hover { background: #2d2d44; color: white; }
+nav a.active { background: #e94560; color: white; }
+nav .logo { font-size: 18px; font-weight: 800; color: white; margin-left: auto; }
+
+/* HEADER */
+.hero {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+  padding: 50px 40px; text-align: center; border-bottom: 1px solid #2d2d44;
+}
+.hero h1 { font-size: 32px; font-weight: 800; color: white; margin-bottom: 10px; }
+.hero p { font-size: 15px; color: #94a3b8; }
+.hero .stats { display: flex; justify-content: center; gap: 40px; margin-top: 30px; }
+.hero-stat { text-align: center; }
+.hero-stat .n { font-size: 36px; font-weight: 900; color: #e94560; }
+.hero-stat .l { font-size: 13px; color: #94a3b8; margin-top: 4px; }
+
+.container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+
+h2 { font-size: 20px; font-weight: 800; color: white; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+h2 span { width: 4px; height: 22px; background: #e94560; border-radius: 3px; display: inline-block; }
+
+.section { margin-bottom: 50px; }
+
+/* PATH SPLIT */
+.paths { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 40px; }
+.path-card {
+  background: #1a1a2e; border-radius: 16px; padding: 28px;
+  border: 2px solid; position: relative; overflow: hidden;
+}
+.path-card.primary { border-color: #3b82f6; }
+.path-card.secondary { border-color: #10b981; }
+.path-badge {
+  position: absolute; top: 16px; left: 16px;
+  padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;
+}
+.path-card.primary .path-badge { background: #3b82f6; color: white; }
+.path-card.secondary .path-badge { background: #10b981; color: white; }
+.path-pct { font-size: 52px; font-weight: 900; margin-bottom: 6px; }
+.path-card.primary .path-pct { color: #3b82f6; }
+.path-card.secondary .path-pct { color: #10b981; }
+.path-title { font-size: 16px; font-weight: 700; color: white; margin-bottom: 16px; }
+.path-steps { display: flex; flex-direction: column; gap: 8px; }
+.path-step {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,0.05); padding: 10px 14px; border-radius: 8px;
+  font-size: 13px; color: #cbd5e1;
+}
+.step-icon { font-size: 18px; flex-shrink: 0; }
+.step-arrow { text-align: center; color: #475569; font-size: 18px; margin: 2px 0 2px 28px; }
+
+/* JOURNEY FLOW */
+.journey-flow {
+  display: flex; align-items: flex-start; gap: 0;
+  overflow-x: auto; padding: 20px 0;
+}
+.jstep {
+  display: flex; flex-direction: column; align-items: center; min-width: 140px; flex: 1;
+}
+.jstep-circle {
+  width: 70px; height: 70px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; position: relative; z-index: 2;
+  border: 3px solid;
+}
+.jstep-line {
+  flex: 1; height: 3px; margin-top: 34px; position: relative; min-width: 30px;
+}
+.jstep-label { font-size: 12px; font-weight: 700; color: white; margin-top: 10px; text-align: center; max-width: 120px; }
+.jstep-sub { font-size: 11px; color: #94a3b8; text-align: center; margin-top: 4px; max-width: 120px; }
+.jstep-num { font-size: 20px; font-weight: 900; color: #e94560; margin-top: 6px; }
+.jstep-pct { font-size: 11px; color: #64748b; }
+
+/* SOURCES */
+.source-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.source-card {
+  background: #1a1a2e; border-radius: 14px; padding: 20px;
+  border-top: 4px solid; text-align: center;
+}
+.source-icon { font-size: 32px; margin-bottom: 10px; }
+.source-name { font-size: 13px; color: #94a3b8; margin-bottom: 8px; }
+.source-pct { font-size: 32px; font-weight: 900; }
+.source-count { font-size: 12px; color: #64748b; margin-top: 4px; }
+.source-conv { font-size: 11px; margin-top: 8px; padding: 4px 8px; border-radius: 6px; background: rgba(255,255,255,0.08); }
+
+/* TOUCHPOINTS */
+.touchpoints { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.tp-card {
+  background: #1a1a2e; border-radius: 14px; padding: 20px;
+  border-right: 5px solid; position: relative;
+}
+.tp-rank {
+  position: absolute; top: -10px; right: 16px;
+  background: #e94560; color: white; width: 28px; height: 28px;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800;
+}
+.tp-name { font-size: 14px; font-weight: 700; color: white; margin-bottom: 6px; margin-top: 8px; }
+.tp-desc { font-size: 12px; color: #94a3b8; margin-bottom: 12px; line-height: 1.5; }
+.tp-big { font-size: 36px; font-weight: 900; }
+.tp-label { font-size: 11px; color: #64748b; margin-top: 2px; }
+.tp-bar-wrap { background: #2d2d44; border-radius: 6px; height: 6px; margin-top: 10px; overflow: hidden; }
+.tp-bar { height: 100%; border-radius: 6px; }
+.tp-note { font-size: 11px; color: #64748b; margin-top: 8px; }
+
+/* BEHAVIOR */
+.behavior-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.bcard { background: #1a1a2e; border-radius: 14px; padding: 24px; }
+.bcard h3 { font-size: 14px; font-weight: 700; color: #94a3b8; margin-bottom: 16px; }
+.brow { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.brow-label { font-size: 13px; color: #cbd5e1; min-width: 160px; }
+.brow-bar-wrap { flex: 1; background: #2d2d44; border-radius: 6px; height: 10px; overflow: hidden; }
+.brow-bar { height: 100%; border-radius: 6px; }
+.brow-pct { font-size: 13px; font-weight: 700; min-width: 45px; text-align: left; }
+
+/* GAP */
+.gap-card {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  border: 2px solid #f59e0b; border-radius: 16px; padding: 28px;
+  margin-bottom: 20px;
+}
+.gap-title { font-size: 18px; font-weight: 800; color: #f59e0b; margin-bottom: 16px; }
+.gap-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.gap-item { text-align: center; padding: 16px; background: rgba(245,158,11,0.08); border-radius: 10px; }
+.gap-big { font-size: 32px; font-weight: 900; color: #f59e0b; }
+.gap-lbl { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+.gap-action { font-size: 12px; color: #fbbf24; margin-top: 8px; font-weight: 600; }
+
+/* INSIGHT BOXES */
+.insight { background: #1a1a2e; border-radius: 12px; padding: 16px 20px; margin-bottom: 12px; display: flex; gap: 14px; align-items: flex-start; border-right: 4px solid; }
+.insight.red { border-right-color: #e94560; }
+.insight.green { border-right-color: #10b981; }
+.insight.yellow { border-right-color: #f59e0b; }
+.insight.blue { border-right-color: #3b82f6; }
+.insight-icon { font-size: 22px; flex-shrink: 0; }
+.insight-title { font-size: 13px; font-weight: 700; color: white; margin-bottom: 4px; }
+.insight-text { font-size: 12px; color: #94a3b8; line-height: 1.6; }
+
+@media (max-width: 900px) {
+  .paths, .source-grid, .touchpoints, .behavior-grid, .gap-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="webinar-dashboard.html">📊 דשבורד ראשי</a>
+  <a href="lead-journey.html" class="active">🛤️ מסע הליד</a>
+  <div class="logo">MentMe Analytics</div>
+</nav>
+
+<div class="hero">
+  <h1>🛤️ מסע הליד — מרישום לרכישה</h1>
+  <p>מרץ–מאי 2026 · 297 לקוחות מנותחים · מבוסס על נתוני קארדקום + וובינר + מסרים</p>
+  <div class="stats">
+    <div class="hero-stat"><div class="n">9,102</div><div class="l">נרשמו</div></div>
+    <div class="hero-stat"><div class="n">3,406</div><div class="l">הגיעו לוובינר</div></div>
+    <div class="hero-stat"><div class="n">297</div><div class="l">רכשו</div></div>
+    <div class="hero-stat"><div class="n">2.6%</div><div class="l">המרה כוללת</div></div>
+    <div class="hero-stat"><div class="n">₪628</div><div class="l">ממוצע CAC</div></div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- TWO PATHS -->
+  <div class="section">
+    <h2><span></span>שני מסלולים לרכישה</h2>
+    <div class="paths">
+      <div class="path-card primary">
+        <div class="path-badge">מסלול עיקרי</div>
+        <div class="path-pct">82.5%</div>
+        <div class="path-title">📺 מסלול הוובינר — הגיע וצפה</div>
+        <div class="path-steps">
+          <div class="path-step"><span class="step-icon">📋</span> נרשם לוובינר</div>
+          <div class="step-arrow">↓</div>
+          <div class="path-step"><span class="step-icon">🎬</span> הגיע לשידור המוקלט</div>
+          <div class="step-arrow">↓</div>
+          <div class="path-step"><span class="step-icon">👆</span> 51% לחצו על הצעת המכירה</div>
+          <div class="step-arrow">↓</div>
+          <div class="path-step"><span class="step-icon">💳</span> רכש (offersession)</div>
+        </div>
+      </div>
+      <div class="path-card secondary">
+        <div class="path-badge">מסלול חלופי</div>
+        <div class="path-pct">17.5%</div>
+        <div class="path-title">📧 מסלול מסרים — לא הגיע לוובינר</div>
+        <div class="path-steps">
+          <div class="path-step"><span class="step-icon">📋</span> נרשם לוובינר</div>
+          <div class="step-arrow">↓</div>
+          <div class="path-step"><span class="step-icon">❌</span> לא הגיע לשידור</div>
+          <div class="step-arrow">↓</div>
+          <div class="path-step"><span class="step-icon">📧</span> קיבל מיילים + וואטסאפ</div>
+          <div class="step-arrow">↓</div>
+          <div class="path-step"><span class="step-icon">🎬</span> צפה בהקלטה / קרא מסרים</div>
+          <div class="step-arrow">↓</div>
+          <div class="path-step"><span class="step-icon">💳</span> רכש</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INSIGHT -->
+    <div class="insight green">
+      <span class="insight-icon">💡</span>
+      <div>
+        <div class="insight-title">35 לקוחות קנו בלי לצפות בוובינר בכלל</div>
+        <div class="insight-text">זה מוכיח שה-sequence של מיילים + וואטסאפ לבדו יכול להמיר. עם sequence מחוזק ומפולח יותר למי שלא הגיע, אפשר להגדיל את המסלול החלופי מ-17.5% ל-25%+.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FULL FUNNEL FLOW -->
+  <div class="section">
+    <h2><span></span>משפך מלא — מנרשם לרוכש</h2>
+    <div style="background:#1a1a2e;border-radius:16px;padding:30px;overflow-x:auto">
+      <div style="display:flex;align-items:center;gap:0;min-width:800px">
+
+        <div style="text-align:center;flex:1">
+          <div style="width:80px;height:80px;border-radius:50%;background:#e94560;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto;border:3px solid #ff6b8a">📋</div>
+          <div style="font-size:13px;font-weight:700;color:white;margin-top:10px">נרשמו</div>
+          <div style="font-size:28px;font-weight:900;color:#e94560;margin-top:4px">9,102</div>
+          <div style="font-size:11px;color:#64748b">100%</div>
+        </div>
+
+        <div style="flex:0.5;height:3px;background:linear-gradient(90deg,#e94560,#3b82f6);margin-top:-30px;position:relative">
+          <div style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:11px;color:#64748b;white-space:nowrap">37.4%</div>
+        </div>
+
+        <div style="text-align:center;flex:1">
+          <div style="width:80px;height:80px;border-radius:50%;background:#1e3a5f;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto;border:3px solid #3b82f6">🎬</div>
+          <div style="font-size:13px;font-weight:700;color:white;margin-top:10px">הגיעו לוובינר</div>
+          <div style="font-size:28px;font-weight:900;color:#3b82f6;margin-top:4px">3,406</div>
+          <div style="font-size:11px;color:#64748b">37.4%</div>
+        </div>
+
+        <div style="flex:0.5;height:3px;background:linear-gradient(90deg,#3b82f6,#8b5cf6);margin-top:-30px;position:relative">
+          <div style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:11px;color:#64748b;white-space:nowrap">39.2%</div>
+        </div>
+
+        <div style="text-align:center;flex:1">
+          <div style="width:80px;height:80px;border-radius:50%;background:#2d1b69;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto;border:3px solid #8b5cf6">👁️</div>
+          <div style="font-size:13px;font-weight:700;color:white;margin-top:10px">צפו 75%+</div>
+          <div style="font-size:28px;font-weight:900;color:#8b5cf6;margin-top:4px">1,334</div>
+          <div style="font-size:11px;color:#64748b">39.2% ממשתתפים</div>
+        </div>
+
+        <div style="flex:0.5;height:3px;background:linear-gradient(90deg,#8b5cf6,#f59e0b);margin-top:-30px;position:relative">
+          <div style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:11px;color:#64748b;white-space:nowrap">30%</div>
+        </div>
+
+        <div style="text-align:center;flex:1">
+          <div style="width:80px;height:80px;border-radius:50%;background:#3d2800;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto;border:3px solid #f59e0b">👆</div>
+          <div style="font-size:13px;font-weight:700;color:white;margin-top:10px">לחצו הצעה</div>
+          <div style="font-size:28px;font-weight:900;color:#f59e0b;margin-top:4px">401</div>
+          <div style="font-size:11px;color:#64748b">11.8% ממשתתפים</div>
+        </div>
+
+        <div style="flex:0.5;height:3px;background:linear-gradient(90deg,#f59e0b,#10b981);margin-top:-30px;position:relative">
+          <div style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:11px;color:#64748b;white-space:nowrap">58%</div>
+        </div>
+
+        <div style="text-align:center;flex:1">
+          <div style="width:80px;height:80px;border-radius:50%;background:#052e16;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto;border:3px solid #10b981">💳</div>
+          <div style="font-size:13px;font-weight:700;color:white;margin-top:10px">רכשו</div>
+          <div style="font-size:28px;font-weight:900;color:#10b981;margin-top:4px">234</div>
+          <div style="font-size:11px;color:#64748b">2.6% מנרשמים</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- WHERE DID BUYERS COME FROM -->
+  <div class="section">
+    <h2><span></span>מאיפה הגיעו הרוכשים?</h2>
+    <div class="source-grid">
+      <div class="source-card" style="border-top-color:#e1306c">
+        <div class="source-icon">📸</div>
+        <div class="source-name">Instagram ממומן</div>
+        <div class="source-pct" style="color:#e1306c">41.5%</div>
+        <div class="source-count">83 רוכשים</div>
+        <div class="source-conv" style="color:#e1306c">המרה: 1.52%</div>
+      </div>
+      <div class="source-card" style="border-top-color:#1877f2">
+        <div class="source-icon">👍</div>
+        <div class="source-name">Facebook ממומן</div>
+        <div class="source-pct" style="color:#1877f2">41%</div>
+        <div class="source-count">82 רוכשים</div>
+        <div class="source-conv" style="color:#1877f2">המרה: 1.85%</div>
+      </div>
+      <div class="source-card" style="border-top-color:#10b981">
+        <div class="source-icon">🌱</div>
+        <div class="source-name">אורגני (כל המקורות)</div>
+        <div class="source-pct" style="color:#10b981">16.5%</div>
+        <div class="source-count">33 רוכשים</div>
+        <div class="source-conv" style="color:#10b981">המרה: 3.2% — פי 2!</div>
+      </div>
+      <div class="source-card" style="border-top-color:#64748b">
+        <div class="source-icon">🔗</div>
+        <div class="source-name">לא משודך</div>
+        <div class="source-pct" style="color:#64748b">~97</div>
+        <div class="source-count">לא זוהה מקור</div>
+        <div class="source-conv" style="color:#64748b">⚠️ חסר REF</div>
+      </div>
+    </div>
+    <div class="insight green" style="margin-top:16px">
+      <span class="insight-icon">🔥</span>
+      <div>
+        <div class="insight-title">אורגני ממיר פי 2 מממומן — 3.2% vs 1.68%</div>
+        <div class="insight-text">33 רוכשים מתוך ~1,023 נרשמים אורגניים = 3.2% המרה. לעומת 167 מתוך ~9,933 ממומנים = 1.68%. כל שקל שמשקיעים בתוכן אורגני מניב פי 2 בהמרות.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHICH TOUCHPOINT CONVERTED -->
+  <div class="section">
+    <h2><span></span>מאיזה מסר הגיעה הרכישה? (REF)</h2>
+    <div class="touchpoints">
+
+      <div class="tp-card" style="border-right-color:#f59e0b">
+        <div class="tp-rank">1</div>
+        <div class="tp-name">🎯 offersession</div>
+        <div class="tp-desc">לחצו על הצעת המכירה בזמן הוובינר עצמו — הרגע הכי חם</div>
+        <div class="tp-big" style="color:#f59e0b">66</div>
+        <div class="tp-label">רכישות מתויגות</div>
+        <div class="tp-bar-wrap"><div class="tp-bar" style="width:100%;background:#f59e0b"></div></div>
+        <div class="tp-note">22.2% מהרוכשים</div>
+      </div>
+
+      <div class="tp-card" style="border-right-color:#8b5cf6">
+        <div class="tp-rank">2</div>
+        <div class="tp-name">🎬 ctareplaypage</div>
+        <div class="tp-desc">לחצו על CTA בדף ההקלטה — צפו בהקלטה ואז קנו</div>
+        <div class="tp-big" style="color:#8b5cf6">12</div>
+        <div class="tp-label">רכישות מתויגות</div>
+        <div class="tp-bar-wrap"><div class="tp-bar" style="width:18%;background:#8b5cf6"></div></div>
+        <div class="tp-note">4% מהרוכשים</div>
+      </div>
+
+      <div class="tp-card" style="border-right-color:#10b981">
+        <div class="tp-rank">2</div>
+        <div class="tp-name">⚡ message_right_after</div>
+        <div class="tp-desc">קנו מהודעה מיד אחרי הוובינר — חלון הזהב עובד</div>
+        <div class="tp-big" style="color:#10b981">12</div>
+        <div class="tp-label">רכישות מתויגות</div>
+        <div class="tp-bar-wrap"><div class="tp-bar" style="width:18%;background:#10b981"></div></div>
+        <div class="tp-note">4% מהרוכשים</div>
+      </div>
+
+      <div class="tp-card" style="border-right-color:#3b82f6">
+        <div class="tp-rank">4</div>
+        <div class="tp-name">🔄 aftersession</div>
+        <div class="tp-desc">קנו מהמסרים שאחרי הוובינר</div>
+        <div class="tp-big" style="color:#3b82f6">6</div>
+        <div class="tp-label">רכישות מתויגות</div>
+        <div class="tp-bar-wrap"><div class="tp-bar" style="width:9%;background:#3b82f6"></div></div>
+        <div class="tp-note">2% מהרוכשים</div>
+      </div>
+
+      <div class="tp-card" style="border-right-color:#ef4444">
+        <div class="tp-rank">5</div>
+        <div class="tp-name">⏰ replaypageexpired</div>
+        <div class="tp-desc">קנו מדף הקלטה פג תוקף — urgency עובד</div>
+        <div class="tp-big" style="color:#ef4444">3</div>
+        <div class="tp-label">רכישות מתויגות</div>
+        <div class="tp-bar-wrap"><div class="tp-bar" style="width:5%;background:#ef4444"></div></div>
+        <div class="tp-note">1% מהרוכשים</div>
+      </div>
+
+      <div class="tp-card" style="border-right-color:#374151">
+        <div class="tp-rank">?</div>
+        <div class="tp-name">❓ ללא REF</div>
+        <div class="tp-desc">לא ידוע מאיזה מסר הגיעו — חסר תיוג</div>
+        <div class="tp-big" style="color:#64748b">198</div>
+        <div class="tp-label">רכישות לא מתויגות</div>
+        <div class="tp-bar-wrap"><div class="tp-bar" style="width:66%;background:#374151"></div></div>
+        <div class="tp-note" style="color:#ef4444">⚠️ 66.7% — חסר REF!</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- BUYER BEHAVIOR -->
+  <div class="section">
+    <h2><span></span>התנהגות הרוכשים — מה עשו לפני שקנו?</h2>
+    <div class="behavior-grid">
+      <div class="bcard">
+        <h3>📺 נוכחות בוובינר</h3>
+        <div class="brow">
+          <div class="brow-label">הגיעו לוובינר וקנו</div>
+          <div class="brow-bar-wrap"><div class="brow-bar" style="width:82.5%;background:#3b82f6"></div></div>
+          <div class="brow-pct" style="color:#3b82f6">82.5%</div>
+        </div>
+        <div class="brow">
+          <div class="brow-label">לא הגיעו וקנו בכל זאת</div>
+          <div class="brow-bar-wrap"><div class="brow-bar" style="width:17.5%;background:#10b981"></div></div>
+          <div class="brow-pct" style="color:#10b981">17.5%</div>
+        </div>
+        <div class="brow">
+          <div class="brow-label">לחצו על הצעה בוובינר</div>
+          <div class="brow-bar-wrap"><div class="brow-bar" style="width:51%;background:#8b5cf6"></div></div>
+          <div class="brow-pct" style="color:#8b5cf6">51%</div>
+        </div>
+        <div class="brow">
+          <div class="brow-label">צפו בהקלטה גם</div>
+          <div class="brow-bar-wrap"><div class="brow-bar" style="width:35.5%;background:#f59e0b"></div></div>
+          <div class="brow-pct" style="color:#f59e0b">35.5%</div>
+        </div>
+      </div>
+
+      <div class="bcard">
+        <h3>🎯 עומק הצפייה בוובינר (מבין הרוכשים שהגיעו)</h3>
+        <div class="brow">
+          <div class="brow-label">צפו 90-100%</div>
+          <div class="brow-bar-wrap"><div class="brow-bar" style="width:90%;background:#10b981"></div></div>
+          <div class="brow-pct" style="color:#10b981">~45%</div>
+        </div>
+        <div class="brow">
+          <div class="brow-label">צפו 75-89%</div>
+          <div class="brow-bar-wrap"><div class="brow-bar" style="width:55%;background:#3b82f6"></div></div>
+          <div class="brow-pct" style="color:#3b82f6">~30%</div>
+        </div>
+        <div class="brow">
+          <div class="brow-label">צפו 50-74%</div>
+          <div class="brow-bar-wrap"><div class="brow-bar" style="width:30%;background:#f59e0b"></div></div>
+          <div class="brow-pct" style="color:#f59e0b">~18%</div>
+        </div>
+        <div class="brow">
+          <div class="brow-label">צפו פחות מ-50%</div>
+          <div class="brow-bar-wrap"><div class="brow-bar" style="width:12%;background:#ef4444"></div></div>
+          <div class="brow-pct" style="color:#ef4444">~7%</div>
+        </div>
+        <div style="margin-top:12px;padding:10px;background:rgba(16,185,129,0.1);border-radius:8px;font-size:12px;color:#10b981">
+          💡 93% מהרוכשים צפו לפחות 50% מהוובינר — התוכן מחובר לרכישה
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- THE BIG GAP -->
+  <div class="section">
+    <h2><span></span>⚠️ הפערים הגדולים — איפה מפסידים רכישות</h2>
+    <div class="gap-card">
+      <div class="gap-title">⚠️ הזדמנויות שלא מנוצלות כרגע</div>
+      <div class="gap-grid">
+        <div class="gap-item">
+          <div class="gap-big">5,696</div>
+          <div class="gap-lbl">נרשמו ולא הגיעו לוובינר</div>
+          <div class="gap-action">→ sequence ייעודי יכול להמיר 2-3% = 114-170 רכישות נוספות</div>
+        </div>
+        <div class="gap-item">
+          <div class="gap-big">167</div>
+          <div class="gap-lbl">לחצו על הצעה ולא קנו (מהמשודכים)</div>
+          <div class="gap-action">→ המרה של 20% = 33 רכישות נוספות מיידיות</div>
+        </div>
+        <div class="gap-item">
+          <div class="gap-big">198</div>
+          <div class="gap-lbl">רכישות ללא REF — לא ידוע מהמסר</div>
+          <div class="gap-action">→ הוסף REF לכל כפתור = אופטימיזציה מלאה</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="insight red">
+      <span class="insight-icon">🔴</span>
+      <div>
+        <div class="insight-title">#1 הזדמנות: 5,696 שנרשמו ולא הגיעו לוובינר</div>
+        <div class="insight-text">62.6% מהנרשמים לא רואים את הוובינר בכלל. 35.2% מהם כן צופים בהקלטה. אם תיצור sequence ייעודי לקהל הזה (לא הגעת? הנה מה שפספסת), אפשר לשפר את ההמרה שלהם מ-17.5% ל-25%+ = עשרות רכישות נוספות בחודש.</div>
+      </div>
+    </div>
+    <div class="insight yellow">
+      <span class="insight-icon">🟡</span>
+      <div>
+        <div class="insight-title">#2 הזדמנות: 401 לחצו על ההצעה בוובינר</div>
+        <div class="insight-text">מתוכם רק 102 (25%) סגרו בוובינר עצמו. ה-299 שנשארו הם Hot Leads שעדיין לא קנו. WA + מייל ייעודי תוך 2 שעות מהוובינר: "ראיתי שהתעניינת — יש לי משהו מיוחד עבורך". המרה של 10% = 30 רכישות נוספות לוובינר.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer style="text-align:center;padding:30px;color:#475569;font-size:13px;border-top:1px solid #2d2d44;margin-top:20px">
+  מסע הליד · MentMe · מרץ–מאי 2026 · הופק בעזרת Claude
+</footer>
+
+</body>
+</html>
