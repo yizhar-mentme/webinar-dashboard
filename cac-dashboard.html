@@ -252,9 +252,10 @@
 
 <script>
 const DEFAULT_WEEKS = [
-  { date:'2026-05-31', reg:442, att:196, live:7, rec:0, sales:0, outside:0, meta:7165, tiktok:0, wa:64, cplFb:18, cplTiktok:0 },
-  { date:'2026-06-07', reg:431, att:207, live:17, rec:0, sales:0, outside:0, meta:7000, tiktok:0, wa:20, cplFb:16, cplTiktok:0 },
-  { date:'2026-06-14', reg:689, att:301, live:14, rec:0, sales:0, outside:0, meta:10551, tiktok:191, wa:31, cplFb:11, cplTiktok:7 }
+  { date:'2026-05-31', reg:442, att:196, live:0, rec:7, sales:0, outside:0, meta:7165, tiktok:0, wa:65, cplFb:18, cplTiktok:0 },
+  { date:'2026-06-07', reg:431, att:207, live:0, rec:11, sales:4, outside:2, meta:7000, tiktok:0, wa:21, cplFb:16, cplTiktok:0 },
+  { date:'2026-06-14', reg:689, att:301, live:0, rec:11, sales:1, outside:2, meta:10551, tiktok:191, wa:31, cplFb:11, cplTiktok:7 },
+  { date:'2026-06-21', reg:1458, att:447, live:4, rec:15, sales:6, outside:0, meta:14000, tiktok:564, wa:41, cplFb:15, cplTiktok:14 }
 ];
 const DEFAULT_FIXED = { platform:1667, amir:4000, social:2000, rate:3 };
 let weeks = JSON.parse(localStorage.getItem('cac-weeks') || 'null') || DEFAULT_WEEKS;
