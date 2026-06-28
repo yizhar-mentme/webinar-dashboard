@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MentMe Analytics</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f0; color: #1a1a1a; min-height: 100vh; }
+  nav { background: #1a1a2e; padding: 14px 40px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid #2d2d44; }
+  nav a { color: #94a3b8; text-decoration: none; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; transition: all 0.2s; }
+  nav a:hover { background: #2d2d44; color: white; }
+  nav a.active { background: #e94560; color: white; }
+  nav .logo { font-size: 18px; font-weight: 800; color: white; margin-left: auto; }
+  .header { background: #fff; border-bottom: 1px solid #e8e8e4; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .header h1 { font-size: 18px; font-weight: 500; }
+  .header .subtitle { font-size: 13px; color: #888; margin-top: 2px; }
+  .btn { background: #1a1a1a; color: #fff; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; cursor: pointer; font-family: inherit; }
+  .btn:hover { background: #333; }
+  .btn-outline { background: transparent; color: #1a1a1a; border: 1px solid #d0d0c8; border-radius: 8px; padding: 8px 16px; font-size: 13px; cursor: pointer; font-family: inherit; }
+  .btn-outline:hover { background: #f0f0ea; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 32px; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .kpi-card { background: #fff; border-radius: 12px; padding: 16px 20px; border: 1px solid #e8e8e4; }
+  .kpi-label { font-size: 12px; color: #888; margin-bottom: 6px; }
+  .kpi-value { font-size: 26px; font-weight: 500; }
+  .kpi-change { font-size: 12px; margin-top: 4px; }
+  .up { color: #c0392b; }
+  .down { color: #27ae60; }
+  .neutral { color: #888; }
+
+  .charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #e8e8e4; }
+  .card-title { font-size: 13px; font-weight: 500; color: #888; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+  .cost-breakdown { display: flex; flex-direction: column; gap: 8px; }
+  .cost-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #f0f0ea; font-size: 14px; }
+  .cost-row:last-child { border-bottom: none; font-weight: 500; }
+  .cost-label { color: #555; }
+  .cost-val { font-weight: 500; }
+
+  .history-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .history-table th { text-align: right; padding: 8px 12px; font-size: 11px; font-weight: 500; color: #888; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid #e8e8e4; }
+  .history-table td { padding: 10px 12px; border-bottom: 1px solid #f5f5f0; }
+  .history-table tr:hover td { background: #fafaf8; }
+  .history-table tr:last-child td { border-bottom: none; }
+  .delete-btn { background: none; border: none; color: #ccc; cursor: pointer; font-size: 16px; padding: 0 4px; }
+  .delete-btn:hover { color: #e74c3c; }
+  .edit-btn { background: none; border: none; color: #ccc; cursor: pointer; font-size: 14px; padding: 0 4px; }
+  .edit-btn:hover { color: #333; }
+
+  .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: #fff; border-radius: 16px; padding: 28px; width: 560px; max-height: 90vh; overflow-y: auto; }
+  .modal h2 { font-size: 16px; font-weight: 500; margin-bottom: 20px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-group label { font-size: 12px; color: #888; font-weight: 500; }
+  .form-group input { border: 1px solid #d8d8d0; border-radius: 8px; padding: 9px 12px; font-size: 14px; font-family: inherit; width: 100%; direction: ltr; text-align: right; }
+  .form-group input:focus { outline: none; border-color: #1a1a1a; }
+  .form-divider { grid-column: 1 / -1; border: none; border-top: 1px solid #f0f0ea; margin: 4px 0; }
+  .form-section-title { grid-column: 1 / -1; font-size: 11px; font-weight: 500; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; }
+  .auto-field { background: #fafaf8; color: #888; }
+  .modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+  .empty-state { text-align: center; padding: 48px; color: #aaa; font-size: 14px; }
+
+  .fixed-costs-bar { background: #fff; border-radius: 12px; padding: 16px 20px; border: 1px solid #e8e8e4; margin-bottom: 24px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+  .fixed-costs-bar .fc-label { font-size: 12px; color: #888; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; margin-left: 8px; }
+  .fixed-costs-bar input { border: 1px solid #d8d8d0; border-radius: 8px; padding: 7px 10px; font-size: 14px; width: 110px; font-family: inherit; direction: ltr; text-align: right; }
+  .fixed-costs-bar input:focus { outline: none; border-color: #1a1a1a; }
+  .fixed-group { display: flex; flex-direction: column; gap: 4px; }
+  .fixed-group label { font-size: 11px; color: #aaa; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="webinar-dashboard.html">📊 דשבורד ראשי</a>
+  <a href="lead-journey-source.html">🛤️ מסע ליד - רוכש</a>
+  <a href="cac-dashboard.html" class="active">💰 CAC דשבורד</a>
+  <div class="logo">MentMe Analytics</div>
+</nav>
+
+<div class="header">
+  <div>
+    <h1>דשבורד CAC — וובינרים</h1>
+    <div class="subtitle" id="last-updated">אין נתונים עדיין</div>
+  </div>
+  <button class="btn" onclick="openModal()">+ הוסף שבוע</button>
+</div>
+
+<div class="container">
+
+  <div class="fixed-costs-bar">
+    <span class="fc-label">עלויות קבועות חודשיות:</span>
+    <div class="fixed-group">
+      <label>פלטפורמות (₪)</label>
+      <input type="number" id="fc-platform" placeholder="0" oninput="saveFixed();renderAll()">
+    </div>
+    <div class="fixed-group">
+      <label>אמיר רשף (₪)</label>
+      <input type="number" id="fc-amir" placeholder="0" oninput="saveFixed();renderAll()">
+    </div>
+    <div class="fixed-group">
+      <label>מנהלת סושיאל (₪)</label>
+      <input type="number" id="fc-social" placeholder="0" oninput="saveFixed();renderAll()">
+    </div>
+    <div class="fixed-group">
+      <label>שער דולר</label>
+      <input type="number" id="fc-rate" placeholder="3.0" step="0.01" oninput="saveFixed();renderAll()">
+    </div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">CAC השבוע</div>
+      <div class="kpi-value" id="kpi-cac">—</div>
+      <div class="kpi-change" id="kpi-cac-change"></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">עלות ליד</div>
+      <div class="kpi-value" id="kpi-cpl">—</div>
+      <div class="kpi-change" id="kpi-cpl-change"></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">רכישות</div>
+      <div class="kpi-value" id="kpi-purchases">—</div>
+      <div class="kpi-change" id="kpi-purchases-change"></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">סה"כ עלויות</div>
+      <div class="kpi-value" id="kpi-total">—</div>
+      <div class="kpi-change" id="kpi-total-change"></div>
+    </div>
+  </div>
+
+  <div class="charts-row">
+    <div class="card">
+      <div class="card-title">CAC לאורך שבועות</div>
+      <canvas id="cac-chart" height="160"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">פירוט עלויות — שבוע אחרון</div>
+      <div class="cost-breakdown" id="cost-breakdown">
+        <div class="empty-state">אין נתונים</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
+      <span>היסטוריה שבועית</span>
+    </div>
+    <div id="history-container">
+      <div class="empty-state">לחץ על "הוסף שבוע" כדי להתחיל</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h2 id="modal-title">הוספת שבוע חדש</h2>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>תאריך התחלת שבוע</label>
+        <input type="date" id="f-date">
+      </div>
+
+      <div class="form-section-title">נתוני קהל</div>
+      <div class="form-group">
+        <label>רשומים</label>
+        <input type="number" id="f-reg" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label>משתתפים</label>
+        <input type="number" id="f-att" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label>רכישות לייב</label>
+        <input type="number" id="f-live" placeholder="0" oninput="calcAuto()">
+      </div>
+      <div class="form-group">
+        <label>רכישות מוקלט</label>
+        <input type="number" id="f-rec" placeholder="0" oninput="calcAuto()">
+      </div>
+
+      <hr class="form-divider">
+      <div class="form-section-title">עלויות פרסום</div>
+      <div class="form-group">
+        <label>מטא (₪)</label>
+        <input type="number" id="f-meta" placeholder="0" oninput="calcAuto()">
+      </div>
+      <div class="form-group">
+        <label>טיקטוק (₪)</label>
+        <input type="number" id="f-tiktok" placeholder="0" oninput="calcAuto()">
+      </div>
+      <div class="form-group full">
+        <label>וואטסאפ ($)</label>
+        <input type="number" id="f-wa" placeholder="0" step="0.01" oninput="calcAuto()">
+      </div>
+
+      <hr class="form-divider">
+      <div class="form-section-title">עלויות אוטומטיות (מחושב)</div>
+      <div class="form-group">
+        <label>עמלת סליקה 0.95% (₪)</label>
+        <input type="number" id="f-processing" class="auto-field" readonly>
+      </div>
+      <div class="form-group">
+        <label>EZ / מכירות (₪)</label>
+        <input type="number" id="f-ez" class="auto-field" readonly>
+      </div>
+      <div class="form-group full">
+        <label>סה"כ עלויות (₪)</label>
+        <input type="number" id="f-total" class="auto-field" readonly>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="closeModal()">ביטול</button>
+      <button class="btn" onclick="saveWeek()">שמור</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let weeks = JSON.parse(localStorage.getItem('cac-weeks') || '[]');
+let editIndex = -1;
+let cacChart = null;
+
+function getFixed() {
+  return {
+    platform: parseFloat(document.getElementById('fc-platform').value) || 0,
+    amir: parseFloat(document.getElementById('fc-amir').value) || 0,
+    social: parseFloat(document.getElementById('fc-social').value) || 0,
+    rate: parseFloat(document.getElementById('fc-rate').value) || 3.0
+  };
+}
+
+function saveFixed() {
+  const f = getFixed();
+  localStorage.setItem('cac-fixed', JSON.stringify(f));
+}
+
+function loadFixed() {
+  const f = JSON.parse(localStorage.getItem('cac-fixed') || '{}');
+  if (f.platform !== undefined) document.getElementById('fc-platform').value = f.platform;
+  if (f.amir !== undefined) document.getElementById('fc-amir').value = f.amir;
+  if (f.social !== undefined) document.getElementById('fc-social').value = f.social;
+  if (f.rate !== undefined) document.getElementById('fc-rate').value = f.rate;
+}
+
+function calcWeekCosts(w, fixed) {
+  const purchases = (w.live || 0) + (w.rec || 0);
+  const processing = purchases * 2240 * 0.0095;
+  const ez = purchases * 80;
+  const waILS = (w.wa || 0) * (fixed.rate || 3.0);
+  const fixedWeekly = ((fixed.platform || 0) + (fixed.amir || 0) + (fixed.social || 0)) / 4;
+  const total = (w.meta || 0) + (w.tiktok || 0) + waILS + processing + ez + fixedWeekly;
+  return { purchases, processing, ez, waILS, fixedWeekly, total };
+}
+
+function calcAuto() {
+  const fixed = getFixed();
+  const live = parseFloat(document.getElementById('f-live').value) || 0;
+  const rec = parseFloat(document.getElementById('f-rec').value) || 0;
+  const meta = parseFloat(document.getElementById('f-meta').value) || 0;
+  const tiktok = parseFloat(document.getElementById('f-tiktok').value) || 0;
+  const wa = parseFloat(document.getElementById('f-wa').value) || 0;
+  const purchases = live + rec;
+  const processing = purchases * 2240 * 0.0095;
+  const ez = purchases * 80;
+  const waILS = wa * (fixed.rate || 3.0);
+  const fixedWeekly = ((fixed.platform || 0) + (fixed.amir || 0) + (fixed.social || 0)) / 4;
+  const total = meta + tiktok + waILS + processing + ez + fixedWeekly;
+  document.getElementById('f-processing').value = Math.round(processing);
+  document.getElementById('f-ez').value = Math.round(ez);
+  document.getElementById('f-total').value = Math.round(total);
+}
+
+function openModal(idx) {
+  editIndex = idx !== undefined ? idx : -1;
+  document.getElementById('modal-title').textContent = editIndex >= 0 ? 'עריכת שבוע' : 'הוספת שבוע חדש';
+  if (editIndex >= 0) {
+    const w = weeks[editIndex];
+    document.getElementById('f-date').value = w.date || '';
+    document.getElementById('f-reg').value = w.reg || '';
+    document.getElementById('f-att').value = w.att || '';
+    document.getElementById('f-live').value = w.live || '';
+    document.getElementById('f-rec').value = w.rec || '';
+    document.getElementById('f-meta').value = w.meta || '';
+    document.getElementById('f-tiktok').value = w.tiktok || '';
+    document.getElementById('f-wa').value = w.wa || '';
+  } else {
+    ['f-date','f-reg','f-att','f-live','f-rec','f-meta','f-tiktok','f-wa'].forEach(id => document.getElementById(id).value = '');
+  }
+  calcAuto();
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  editIndex = -1;
+}
+
+function saveWeek() {
+  const w = {
+    date: document.getElementById('f-date').value,
+    reg: parseFloat(document.getElementById('f-reg').value) || 0,
+    att: parseFloat(document.getElementById('f-att').value) || 0,
+    live: parseFloat(document.getElementById('f-live').value) || 0,
+    rec: parseFloat(document.getElementById('f-rec').value) || 0,
+    meta: parseFloat(document.getElementById('f-meta').value) || 0,
+    tiktok: parseFloat(document.getElementById('f-tiktok').value) || 0,
+    wa: parseFloat(document.getElementById('f-wa').value) || 0
+  };
+  if (!w.date) { alert('יש להכניס תאריך'); return; }
+  if (editIndex >= 0) {
+    weeks[editIndex] = w;
+  } else {
+    weeks.push(w);
+    weeks.sort((a,b) => a.date.localeCompare(b.date));
+  }
+  localStorage.setItem('cac-weeks', JSON.stringify(weeks));
+  closeModal();
+  renderAll();
+}
+
+function deleteWeek(idx) {
+  if (!confirm('למחוק שבוע זה?')) return;
+  weeks.splice(idx, 1);
+  localStorage.setItem('cac-weeks', JSON.stringify(weeks));
+  renderAll();
+}
+
+function fmt(n) { return Math.round(n).toLocaleString('he-IL'); }
+
+function pctChange(curr, prev) {
+  if (!prev) return null;
+  return ((curr - prev) / prev * 100).toFixed(1);
+}
+
+function changeEl(pct, lowerIsBetter) {
+  if (pct === null) return '';
+  const arrow = pct > 0 ? '↑' : '↓';
+  const isGood = lowerIsBetter ? pct < 0 : pct > 0;
+  const cls = isGood ? 'down' : 'up';
+  return `<span class="${cls}">${arrow} ${Math.abs(pct)}% משבוע קודם</span>`;
+}
+
+function renderAll() {
+  const fixed = getFixed();
+  const n = weeks.length;
+
+  if (n === 0) {
+    document.getElementById('last-updated').textContent = 'אין נתונים עדיין';
+    ['kpi-cac','kpi-cpl','kpi-purchases','kpi-total'].forEach(id => { document.getElementById(id).textContent = '—'; });
+    ['kpi-cac-change','kpi-cpl-change','kpi-purchases-change','kpi-total-change'].forEach(id => { document.getElementById(id).innerHTML = ''; });
+    document.getElementById('cost-breakdown').innerHTML = '<div class="empty-state">אין נתונים</div>';
+    document.getElementById('history-container').innerHTML = '<div class="empty-state">לחץ על "הוסף שבוע" כדי להתחיל</div>';
+    if (cacChart) { cacChart.destroy(); cacChart = null; }
+    return;
+  }
+
+  const last = weeks[n-1];
+  const prev = n >= 2 ? weeks[n-2] : null;
+  const lc = calcWeekCosts(last, fixed);
+  const pc = prev ? calcWeekCosts(prev, fixed) : null;
+
+  const cac = lc.purchases > 0 ? lc.total / lc.purchases : 0;
+  const cpl = last.reg > 0 ? lc.total / last.reg : 0;
+  const prevCac = pc && pc.purchases > 0 ? pc.total / pc.purchases : null;
+  const prevCpl = prev && prev.reg > 0 ? pc.total / prev.reg : null;
+
+  document.getElementById('kpi-cac').textContent = lc.purchases > 0 ? '₪' + fmt(cac) : '—';
+  document.getElementById('kpi-cpl').textContent = last.reg > 0 ? '₪' + fmt(cpl) : '—';
+  document.getElementById('kpi-purchases').textContent = lc.purchases;
+  document.getElementById('kpi-total').textContent = '₪' + fmt(lc.total);
+
+  document.getElementById('kpi-cac-change').innerHTML = changeEl(pctChange(cac, prevCac), true);
+  document.getElementById('kpi-cpl-change').innerHTML = changeEl(pctChange(cpl, prevCpl), true);
+  document.getElementById('kpi-purchases-change').innerHTML = changeEl(pctChange(lc.purchases, pc ? pc.purchases : null), false);
+  document.getElementById('kpi-total-change').innerHTML = changeEl(pctChange(lc.total, pc ? pc.total : null), true);
+
+  const dateStr = new Date(last.date).toLocaleDateString('he-IL', {day:'numeric',month:'numeric',year:'numeric'});
+  document.getElementById('last-updated').textContent = 'עדכון אחרון: שבוע ' + dateStr;
+
+  const fixedW = lc.fixedWeekly;
+  document.getElementById('cost-breakdown').innerHTML = `
+    <div class="cost-row"><span class="cost-label">מטא</span><span class="cost-val">₪${fmt(last.meta)}</span></div>
+    <div class="cost-row"><span class="cost-label">טיקטוק</span><span class="cost-val">₪${fmt(last.tiktok)}</span></div>
+    <div class="cost-row"><span class="cost-label">וואטסאפ</span><span class="cost-val">₪${fmt(lc.waILS)}</span></div>
+    <div class="cost-row"><span class="cost-label">עמלת סליקה</span><span class="cost-val">₪${fmt(lc.processing)}</span></div>
+    <div class="cost-row"><span class="cost-label">EZ / מכירות</span><span class="cost-val">₪${fmt(lc.ez)}</span></div>
+    <div class="cost-row"><span class="cost-label">עלויות קבועות (שבועי)</span><span class="cost-val">₪${fmt(fixedW)}</span></div>
+    <div class="cost-row"><span class="cost-label">סה"כ</span><span class="cost-val">₪${fmt(lc.total)}</span></div>
+  `;
+
+  const labels = weeks.map(w => new Date(w.date).toLocaleDateString('he-IL',{day:'numeric',month:'numeric'}));
+  const cacData = weeks.map(w => { const c = calcWeekCosts(w, fixed); return c.purchases > 0 ? Math.round(c.total / c.purchases) : null; });
+  const cplData = weeks.map(w => { const c = calcWeekCosts(w, fixed); return w.reg > 0 ? Math.round(c.total / w.reg) : null; });
+
+  if (cacChart) cacChart.destroy();
+  const ctx = document.getElementById('cac-chart').getContext('2d');
+  cacChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'CAC (₪)', data: cacData, backgroundColor: '#185FA5', borderRadius: 4, yAxisID: 'y' },
+        { label: 'עלות ליד (₪)', data: cplData, type: 'line', borderColor: '#c0392b', backgroundColor: 'transparent', tension: 0.3, pointRadius: 4, yAxisID: 'y2' }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 12 } } },
+      scales: {
+        y: { position: 'right', ticks: { callback: v => '₪' + v.toLocaleString(), font: { size: 11 } }, grid: { color: '#f0f0ea' } },
+        y2: { position: 'left', ticks: { callback: v => '₪' + v.toLocaleString(), font: { size: 11 } }, grid: { display: false } },
+        x: { ticks: { font: { size: 11 } }, grid: { display: false } }
+      }
+    }
+  });
+
+  const rows = weeks.map((w, i) => {
+    const c = calcWeekCosts(w, fixed);
+    const cac = c.purchases > 0 ? '₪' + fmt(c.total / c.purchases) : '—';
+    const cpl = w.reg > 0 ? '₪' + fmt(c.total / w.reg) : '—';
+    const d = new Date(w.date).toLocaleDateString('he-IL',{day:'numeric',month:'numeric',year:'2-digit'});
+    return `<tr>
+      <td>${d}</td>
+      <td>${w.reg.toLocaleString()}</td>
+      <td>${w.att.toLocaleString()}</td>
+      <td>${c.purchases}</td>
+      <td>₪${fmt(w.meta)}</td>
+      <td>₪${fmt(w.tiktok)}</td>
+      <td>${cac}</td>
+      <td>${cpl}</td>
+      <td>
+        <button class="edit-btn" onclick="openModal(${i})">✏️</button>
+        <button class="delete-btn" onclick="deleteWeek(${i})">×</button>
+      </td>
+    </tr>`;
+  }).reverse().join('');
+
+  document.getElementById('history-container').innerHTML = `
+    <table class="history-table">
+      <thead><tr>
+        <th>תאריך</th><th>רשומים</th><th>משתתפים</th><th>רכישות</th>
+        <th>מטא</th><th>טיקטוק</th><th>CAC</th><th>עלות ליד</th><th></th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+document.getElementById('modal').addEventListener('click', e => { if (e.target === document.getElementById('modal')) closeModal(); });
+loadFixed();
+renderAll();
+</script>
+</body>
+</html>
