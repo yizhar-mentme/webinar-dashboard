@@ -251,7 +251,13 @@
 </div>
 
 <script>
-let weeks = JSON.parse(localStorage.getItem('cac-weeks') || '[]');
+const DEFAULT_WEEKS = [
+  { date:'2026-05-31', reg:442, att:196, live:7, rec:0, sales:0, outside:0, meta:7165, tiktok:0, wa:64, cplFb:18, cplTiktok:0 },
+  { date:'2026-06-07', reg:431, att:207, live:17, rec:0, sales:0, outside:0, meta:7000, tiktok:0, wa:20, cplFb:16, cplTiktok:0 },
+  { date:'2026-06-14', reg:689, att:301, live:14, rec:0, sales:0, outside:0, meta:10551, tiktok:191, wa:31, cplFb:11, cplTiktok:7 }
+];
+const DEFAULT_FIXED = { platform:1667, amir:4000, social:2000, rate:3 };
+let weeks = JSON.parse(localStorage.getItem('cac-weeks') || 'null') || DEFAULT_WEEKS;
 let editIndex = -1;
 let cacChart = null;
 
@@ -270,11 +276,11 @@ function saveFixed() {
 }
 
 function loadFixed() {
-  const f = JSON.parse(localStorage.getItem('cac-fixed') || '{}');
-  if (f.platform !== undefined) document.getElementById('fc-platform').value = f.platform;
-  if (f.amir !== undefined) document.getElementById('fc-amir').value = f.amir;
-  if (f.social !== undefined) document.getElementById('fc-social').value = f.social;
-  if (f.rate !== undefined) document.getElementById('fc-rate').value = f.rate;
+  const f = JSON.parse(localStorage.getItem('cac-fixed') || 'null') || DEFAULT_FIXED;
+  document.getElementById('fc-platform').value = f.platform;
+  document.getElementById('fc-amir').value = f.amir;
+  document.getElementById('fc-social').value = f.social;
+  document.getElementById('fc-rate').value = f.rate;
 }
 
 function calcWeekCosts(w, fixed) {
