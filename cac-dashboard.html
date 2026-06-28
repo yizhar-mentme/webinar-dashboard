@@ -212,16 +212,16 @@
         <input type="number" id="f-meta" placeholder="0" oninput="calcAuto()">
       </div>
       <div class="form-group">
-        <label>לידים פייסבוק</label>
-        <input type="number" id="f-fb-leads" placeholder="0" oninput="calcAuto()">
-      </div>
-      <div class="form-group">
         <label>טיקטוק (₪)</label>
         <input type="number" id="f-tiktok" placeholder="0" oninput="calcAuto()">
       </div>
       <div class="form-group">
-        <label>לידים טיקטוק</label>
-        <input type="number" id="f-tiktok-leads" placeholder="0" oninput="calcAuto()">
+        <label>עלות ליד פייסבוק (₪)</label>
+        <input type="number" id="f-cpl-fb" placeholder="0" step="0.01">
+      </div>
+      <div class="form-group">
+        <label>עלות ליד טיקטוק (₪)</label>
+        <input type="number" id="f-cpl-tiktok" placeholder="0" step="0.01">
       </div>
       <div class="form-group full">
         <label>וואטסאפ ($)</label>
@@ -294,9 +294,7 @@ function calcAuto() {
   const sales = parseFloat(document.getElementById('f-sales').value) || 0;
   const outside = parseFloat(document.getElementById('f-outside').value) || 0;
   const meta = parseFloat(document.getElementById('f-meta').value) || 0;
-  const fbLeads = parseFloat(document.getElementById('f-fb-leads').value) || 0;
   const tiktok = parseFloat(document.getElementById('f-tiktok').value) || 0;
-  const tiktokLeads = parseFloat(document.getElementById('f-tiktok-leads').value) || 0;
   const wa = parseFloat(document.getElementById('f-wa').value) || 0;
   const purchases = live + rec + sales + outside;
   const processing = purchases * (2240 / 1.18) * 0.0095;
@@ -322,12 +320,12 @@ function openModal(idx) {
     document.getElementById('f-sales').value = w.sales || '';
     document.getElementById('f-outside').value = w.outside || '';
     document.getElementById('f-meta').value = w.meta || '';
-    document.getElementById('f-fb-leads').value = w.fbLeads || '';
-    document.getElementById('f-tiktok-leads').value = w.tiktokLeads || '';
     document.getElementById('f-tiktok').value = w.tiktok || '';
+    document.getElementById('f-cpl-fb').value = w.cplFb || '';
+    document.getElementById('f-cpl-tiktok').value = w.cplTiktok || '';
     document.getElementById('f-wa').value = w.wa || '';
   } else {
-    ['f-date','f-reg','f-att','f-live','f-rec','f-sales','f-outside','f-meta','f-fb-leads','f-tiktok','f-tiktok-leads','f-wa'].forEach(id => document.getElementById(id).value = '');
+    ['f-date','f-reg','f-att','f-live','f-rec','f-sales','f-outside','f-meta','f-tiktok','f-wa','f-cpl-fb','f-cpl-tiktok'].forEach(id => document.getElementById(id).value = '');
   }
   calcAuto();
   document.getElementById('modal').classList.add('open');
@@ -348,10 +346,10 @@ function saveWeek() {
     sales: parseFloat(document.getElementById('f-sales').value) || 0,
     outside: parseFloat(document.getElementById('f-outside').value) || 0,
     meta: parseFloat(document.getElementById('f-meta').value) || 0,
-    fbLeads: parseFloat(document.getElementById('f-fb-leads').value) || 0,
     tiktok: parseFloat(document.getElementById('f-tiktok').value) || 0,
-    tiktokLeads: parseFloat(document.getElementById('f-tiktok-leads').value) || 0,
-    wa: parseFloat(document.getElementById('f-wa').value) || 0
+    wa: parseFloat(document.getElementById('f-wa').value) || 0,
+    cplFb: parseFloat(document.getElementById('f-cpl-fb').value) || 0,
+    cplTiktok: parseFloat(document.getElementById('f-cpl-tiktok').value) || 0
   };
   if (!w.date) { alert('יש להכניס תאריך'); return; }
   if (editIndex >= 0) {
@@ -407,21 +405,18 @@ function renderAll() {
   const pc = prev ? calcWeekCosts(prev, fixed) : null;
 
   const cac = lc.purchases > 0 ? lc.total / lc.purchases : 0;
-  const totalLeads = (last.fbLeads || 0) + (last.tiktokLeads || 0);
-  const adSpend = (last.meta || 0) + (last.tiktok || 0);
-  const cpl = totalLeads > 0 ? adSpend / totalLeads : (last.reg > 0 ? lc.total / last.reg : 0);
+  const cplFb = last.cplFb || 0;
+  const cplTiktok = last.cplTiktok || 0;
   const prevCac = pc && pc.purchases > 0 ? pc.total / pc.purchases : null;
-  const prevTotalLeads = prev ? (prev.fbLeads || 0) + (prev.tiktokLeads || 0) : 0;
-  const prevAdSpend = prev ? (prev.meta || 0) + (prev.tiktok || 0) : 0;
-  const prevCpl = prevTotalLeads > 0 ? prevAdSpend / prevTotalLeads : (prev && prev.reg > 0 ? pc.total / prev.reg : null);
+  const prevCplFb = prev ? (prev.cplFb || null) : null;
 
   document.getElementById('kpi-cac').textContent = lc.purchases > 0 ? '₪' + fmt(cac) : '—';
-  document.getElementById('kpi-cpl').textContent = last.reg > 0 ? '₪' + fmt(cpl) : '—';
+  document.getElementById('kpi-cpl').textContent = (cplFb > 0 || cplTiktok > 0) ? `FB ₪${fmt(cplFb)} | TT ₪${fmt(cplTiktok)}` : '—';
   document.getElementById('kpi-purchases').textContent = lc.purchases;
   document.getElementById('kpi-total').textContent = '₪' + fmt(lc.total);
 
   document.getElementById('kpi-cac-change').innerHTML = changeEl(pctChange(cac, prevCac), true);
-  document.getElementById('kpi-cpl-change').innerHTML = changeEl(pctChange(cpl, prevCpl), true);
+  document.getElementById('kpi-cpl-change').innerHTML = changeEl(pctChange(cplFb, prevCplFb), true);
   document.getElementById('kpi-purchases-change').innerHTML = changeEl(pctChange(lc.purchases, pc ? pc.purchases : null), false);
   document.getElementById('kpi-total-change').innerHTML = changeEl(pctChange(lc.total, pc ? pc.total : null), true);
 
@@ -441,7 +436,8 @@ function renderAll() {
 
   const labels = weeks.map(w => new Date(w.date).toLocaleDateString('he-IL',{day:'numeric',month:'numeric'}));
   const cacData = weeks.map(w => { const c = calcWeekCosts(w, fixed); return c.purchases > 0 ? Math.round(c.total / c.purchases) : null; });
-  const cplData = weeks.map(w => { const leads = (w.fbLeads||0)+(w.tiktokLeads||0); const spend = (w.meta||0)+(w.tiktok||0); return leads > 0 ? Math.round(spend/leads) : null; });
+  const cplFbData = weeks.map(w => w.cplFb > 0 ? w.cplFb : null);
+  const cplTiktokData = weeks.map(w => w.cplTiktok > 0 ? w.cplTiktok : null);
 
   if (cacChart) cacChart.destroy();
   const ctx = document.getElementById('cac-chart').getContext('2d');
@@ -452,7 +448,8 @@ function renderAll() {
       datasets: [
         { label: 'CAC (₪)', data: cacData, backgroundColor: '#185FA550', borderRadius: 4, yAxisID: 'y', order: 2 },
         { label: 'מגמת CAC', data: cacData, type: 'line', borderColor: '#185FA5', backgroundColor: 'transparent', tension: 0.3, pointRadius: 5, pointBackgroundColor: '#185FA5', yAxisID: 'y', order: 1 },
-        { label: 'עלות ליד (₪)', data: cplData, type: 'line', borderColor: '#c0392b', backgroundColor: 'transparent', tension: 0.3, pointRadius: 4, yAxisID: 'y2', order: 1 }
+        { label: 'עלות ליד FB (₪)', data: cplFbData, type: 'line', borderColor: '#c0392b', backgroundColor: 'transparent', tension: 0.3, pointRadius: 4, yAxisID: 'y2', order: 1 },
+        { label: 'עלות ליד TT (₪)', data: cplTiktokData, type: 'line', borderColor: '#e67e22', backgroundColor: 'transparent', tension: 0.3, pointRadius: 4, borderDash: [4,3], yAxisID: 'y2', order: 1 }
       ]
     },
     options: {
@@ -469,8 +466,8 @@ function renderAll() {
   const rows = weeks.map((w, i) => {
     const c = calcWeekCosts(w, fixed);
     const cac = c.purchases > 0 ? '₪' + fmt(c.total / c.purchases) : '—';
-    const leads = (w.fbLeads||0)+(w.tiktokLeads||0); const spend = (w.meta||0)+(w.tiktok||0);
-    const cpl = leads > 0 ? '₪' + fmt(spend/leads) : '—';
+    const cplFb = w.cplFb > 0 ? '₪' + fmt(w.cplFb) : '—';
+    const cplTiktok = w.cplTiktok > 0 ? '₪' + fmt(w.cplTiktok) : '—';
     const d = new Date(w.date).toLocaleDateString('he-IL',{day:'numeric',month:'numeric',year:'2-digit'});
     return `<tr>
       <td>${d}</td>
@@ -480,7 +477,8 @@ function renderAll() {
       <td>₪${fmt(w.meta)}</td>
       <td>₪${fmt(w.tiktok)}</td>
       <td>${cac}</td>
-      <td>${cpl}</td>
+      <td>${cplFb}</td>
+      <td>${cplTiktok}</td>
       <td>
         <button class="edit-btn" onclick="openModal(${i})">✏️</button>
         <button class="delete-btn" onclick="deleteWeek(${i})">×</button>
@@ -492,7 +490,7 @@ function renderAll() {
     <table class="history-table">
       <thead><tr>
         <th>תאריך</th><th>רשומים</th><th>משתתפים</th><th>רכישות</th>
-        <th>מטא</th><th>טיקטוק</th><th>CAC</th><th>עלות ליד</th><th></th>
+        <th>מטא</th><th>טיקטוק</th><th>CAC</th><th>ליד FB</th><th>ליד TT</th><th></th>
       </tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
