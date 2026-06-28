@@ -254,7 +254,7 @@ function loadFixed() {
 
 function calcWeekCosts(w, fixed) {
   const purchases = (w.live || 0) + (w.rec || 0);
-  const processing = purchases * 2240 * 0.0095;
+  const processing = purchases * (2240 / 1.18) * 0.0095;
   const ez = purchases * 80;
   const waILS = (w.wa || 0) * (fixed.rate || 3.0);
   const fixedWeekly = ((fixed.platform || 0) + (fixed.amir || 0) + (fixed.social || 0)) / 4;
@@ -270,7 +270,7 @@ function calcAuto() {
   const tiktok = parseFloat(document.getElementById('f-tiktok').value) || 0;
   const wa = parseFloat(document.getElementById('f-wa').value) || 0;
   const purchases = live + rec;
-  const processing = purchases * 2240 * 0.0095;
+  const processing = purchases * (2240 / 1.18) * 0.0095;
   const ez = purchases * 80;
   const waILS = wa * (fixed.rate || 3.0);
   const fixedWeekly = ((fixed.platform || 0) + (fixed.amir || 0) + (fixed.social || 0)) / 4;
@@ -409,8 +409,9 @@ function renderAll() {
     data: {
       labels,
       datasets: [
-        { label: 'CAC (₪)', data: cacData, backgroundColor: '#185FA5', borderRadius: 4, yAxisID: 'y' },
-        { label: 'עלות ליד (₪)', data: cplData, type: 'line', borderColor: '#c0392b', backgroundColor: 'transparent', tension: 0.3, pointRadius: 4, yAxisID: 'y2' }
+        { label: 'CAC (₪)', data: cacData, backgroundColor: '#185FA550', borderRadius: 4, yAxisID: 'y', order: 2 },
+        { label: 'מגמת CAC', data: cacData, type: 'line', borderColor: '#185FA5', backgroundColor: 'transparent', tension: 0.3, pointRadius: 5, pointBackgroundColor: '#185FA5', yAxisID: 'y', order: 1 },
+        { label: 'עלות ליד (₪)', data: cplData, type: 'line', borderColor: '#c0392b', backgroundColor: 'transparent', tension: 0.3, pointRadius: 4, yAxisID: 'y2', order: 1 }
       ]
     },
     options: {
