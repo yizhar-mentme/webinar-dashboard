@@ -196,6 +196,14 @@
         <label>רכישות מוקלט</label>
         <input type="number" id="f-rec" placeholder="0" oninput="calcAuto()">
       </div>
+      <div class="form-group">
+        <label>רכישות משיחות מכירה</label>
+        <input type="number" id="f-sales" placeholder="0" oninput="calcAuto()">
+      </div>
+      <div class="form-group">
+        <label>רכישות מחוץ לוובינר</label>
+        <input type="number" id="f-outside" placeholder="0" oninput="calcAuto()">
+      </div>
 
       <hr class="form-divider">
       <div class="form-section-title">עלויות פרסום</div>
@@ -262,7 +270,7 @@ function loadFixed() {
 }
 
 function calcWeekCosts(w, fixed) {
-  const purchases = (w.live || 0) + (w.rec || 0);
+  const purchases = (w.live || 0) + (w.rec || 0) + (w.sales || 0) + (w.outside || 0);
   const processing = purchases * (2240 / 1.18) * 0.0095;
   const ez = purchases * 80;
   const waILS = (w.wa || 0) * (fixed.rate || 3.0);
@@ -275,10 +283,12 @@ function calcAuto() {
   const fixed = getFixed();
   const live = parseFloat(document.getElementById('f-live').value) || 0;
   const rec = parseFloat(document.getElementById('f-rec').value) || 0;
+  const sales = parseFloat(document.getElementById('f-sales').value) || 0;
+  const outside = parseFloat(document.getElementById('f-outside').value) || 0;
   const meta = parseFloat(document.getElementById('f-meta').value) || 0;
   const tiktok = parseFloat(document.getElementById('f-tiktok').value) || 0;
   const wa = parseFloat(document.getElementById('f-wa').value) || 0;
-  const purchases = live + rec;
+  const purchases = live + rec + sales + outside;
   const processing = purchases * (2240 / 1.18) * 0.0095;
   const ez = purchases * 80;
   const waILS = wa * (fixed.rate || 3.0);
@@ -299,11 +309,13 @@ function openModal(idx) {
     document.getElementById('f-att').value = w.att || '';
     document.getElementById('f-live').value = w.live || '';
     document.getElementById('f-rec').value = w.rec || '';
+    document.getElementById('f-sales').value = w.sales || '';
+    document.getElementById('f-outside').value = w.outside || '';
     document.getElementById('f-meta').value = w.meta || '';
     document.getElementById('f-tiktok').value = w.tiktok || '';
     document.getElementById('f-wa').value = w.wa || '';
   } else {
-    ['f-date','f-reg','f-att','f-live','f-rec','f-meta','f-tiktok','f-wa'].forEach(id => document.getElementById(id).value = '');
+    ['f-date','f-reg','f-att','f-live','f-rec','f-sales','f-outside','f-meta','f-tiktok','f-wa'].forEach(id => document.getElementById(id).value = '');
   }
   calcAuto();
   document.getElementById('modal').classList.add('open');
@@ -321,6 +333,8 @@ function saveWeek() {
     att: parseFloat(document.getElementById('f-att').value) || 0,
     live: parseFloat(document.getElementById('f-live').value) || 0,
     rec: parseFloat(document.getElementById('f-rec').value) || 0,
+    sales: parseFloat(document.getElementById('f-sales').value) || 0,
+    outside: parseFloat(document.getElementById('f-outside').value) || 0,
     meta: parseFloat(document.getElementById('f-meta').value) || 0,
     tiktok: parseFloat(document.getElementById('f-tiktok').value) || 0,
     wa: parseFloat(document.getElementById('f-wa').value) || 0
