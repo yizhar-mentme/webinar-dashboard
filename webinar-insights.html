@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MentMe — Conversion Insights</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f0; color: #1a1a1a; min-height: 100vh; }
+  nav { background: #1a1a2e; padding: 10px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #2d2d44; flex-wrap: wrap; }
+  nav a { color: #94a3b8; text-decoration: none; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; transition: all 0.2s; white-space: nowrap; }
+  nav a:hover { background: #2d2d44; color: white; }
+  nav a.active { background: #e94560; color: white; }
+  nav .logo { font-size: 16px; font-weight: 800; color: white; margin-left: auto; }
+
+  .header { background: #fff; border-bottom: 1px solid #e8e8e4; padding: 16px 32px; }
+  .header h1 { font-size: 18px; font-weight: 500; }
+  .header .subtitle { font-size: 13px; color: #888; margin-top: 2px; }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 32px; }
+
+  .section-title { font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
+
+  .card { background: #fff; border-radius: 12px; padding: 20px 24px; border: 1px solid #e8e8e4; margin-bottom: 20px; }
+  .card-title { font-size: 14px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+  /* KPI row */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+  .kpi { background: #fff; border-radius: 12px; padding: 16px 20px; border: 1px solid #e8e8e4; }
+  .kpi-label { font-size: 11px; color: #888; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .kpi-value { font-size: 28px; font-weight: 500; }
+  .kpi-sub { font-size: 12px; color: #aaa; margin-top: 4px; }
+  .green { color: #16a34a; }
+  .red { color: #dc2626; }
+  .orange { color: #ea580c; }
+
+  /* Sessions table */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: right; padding: 8px 12px; font-size: 11px; font-weight: 500; color: #888; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 2px solid #e8e8e4; white-space: nowrap; }
+  td { padding: 10px 12px; border-bottom: 1px solid #f5f5f0; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fafaf8; }
+
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge-green { background: #dcfce7; color: #16a34a; }
+  .badge-red { background: #fee2e2; color: #dc2626; }
+  .badge-orange { background: #ffedd5; color: #ea580c; }
+  .badge-gray { background: #f1f5f9; color: #64748b; }
+  .badge-blue { background: #dbeafe; color: #2563eb; }
+
+  /* Admin comparison */
+  .admin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+  .admin-card { border-radius: 12px; padding: 20px; border: 2px solid; }
+  .admin-naomi { background: #f0fdf4; border-color: #bbf7d0; }
+  .admin-yishai { background: #fff7ed; border-color: #fed7aa; }
+  .admin-bar { background: #f8fafc; border-color: #e2e8f0; }
+  .admin-name { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .admin-conv { font-size: 32px; font-weight: 300; margin: 8px 0; }
+  .admin-sessions { font-size: 12px; color: #888; }
+  .admin-sessions span { display: block; margin-top: 4px; }
+
+  /* Timeline */
+  .timeline { display: flex; flex-direction: column; gap: 0; }
+  .timeline-item { display: flex; gap: 16px; padding: 12px 0; border-bottom: 1px solid #f5f5f0; }
+  .timeline-item:last-child { border-bottom: none; }
+  .timeline-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+  .dot-green { background: #16a34a; }
+  .dot-red { background: #dc2626; }
+  .dot-orange { background: #ea580c; }
+  .timeline-content { flex: 1; }
+  .timeline-time { font-size: 12px; font-weight: 600; color: #888; margin-bottom: 2px; }
+  .timeline-text { font-size: 13px; }
+
+  /* Recommendations */
+  .rec-list { display: flex; flex-direction: column; gap: 12px; }
+  .rec { display: flex; gap: 14px; align-items: flex-start; padding: 14px; border-radius: 10px; }
+  .rec-p1 { background: #fff1f2; border: 1px solid #fecdd3; }
+  .rec-p2 { background: #fffbeb; border: 1px solid #fde68a; }
+  .rec-p3 { background: #f0f9ff; border: 1px solid #bae6fd; }
+  .rec-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+  .rec-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .rec-desc { font-size: 12px; color: #555; line-height: 1.5; }
+  .rec-impact { font-size: 11px; font-weight: 600; margin-top: 6px; }
+  .impact-high { color: #dc2626; }
+  .impact-med { color: #ea580c; }
+  .impact-low { color: #2563eb; }
+
+  /* Attendance chart */
+  .chart-wrap { position: relative; height: 200px; margin-top: 8px; }
+  .pitch-line { position: absolute; top: 0; bottom: 0; width: 2px; background: #dc2626; opacity: 0.6; }
+  .pitch-label { position: absolute; top: 4px; font-size: 10px; color: #dc2626; font-weight: 600; white-space: nowrap; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  .insight-pill { display: inline-flex; align-items: center; gap: 6px; background: #f1f5f9; border-radius: 20px; padding: 4px 12px; font-size: 12px; color: #475569; margin: 3px; }
+  .insight-pill.warn { background: #fff7ed; color: #9a3412; }
+  .insight-pill.good { background: #f0fdf4; color: #166534; }
+
+  .script-box { background: #1a1a2e; color: #e2e8f0; border-radius: 10px; padding: 14px 16px; font-size: 12px; line-height: 1.8; margin-top: 8px; direction: rtl; }
+  .script-line { margin-bottom: 6px; }
+  .script-label { color: #94a3b8; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
+
+  @media (max-width: 700px) {
+    .container { padding: 16px; }
+    .kpi-row { grid-template-columns: 1fr 1fr; }
+    .admin-grid { grid-template-columns: 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="webinar-dashboard.html">📊 דשבורד ראשי</a>
+  <a href="lead-journey.html">🛤️ מסע ליד - רוכש</a>
+  <a href="cac-dashboard.html">💰 CAC דשבורד</a>
+  <a href="webinar-insights.html" class="active">🔍 Conversion Insights</a>
+  <div class="logo">MentMe Analytics</div>
+</nav>
+
+<div class="header">
+  <h1>Conversion Insights — Webinar Analysis</h1>
+  <div class="subtitle">ניתוח שבועות 1–4 | יוני 2026 | מחיר ₪2,240</div>
+</div>
+
+<div class="container">
+
+  <!-- KPIs -->
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-label">ממוצע המרה — נעמי</div>
+      <div class="kpi-value green">6.12%</div>
+      <div class="kpi-sub">5 וובינרים | 26 רכישות</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">ממוצע המרה — ישי</div>
+      <div class="kpi-value orange">3.71%</div>
+      <div class="kpi-sub">4 וובינרים | 14 רכישות</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">הפסד הכנסה — 28/6</div>
+      <div class="kpi-value red">₪16,576</div>
+      <div class="kpi-sub">vs. ביצועי נעמי עם קהל זהה</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">קהל שאובד לפני ה-Pitch</div>
+      <div class="kpi-value orange">27%</div>
+      <div class="kpi-sub">מהשיא (4,400) עד דקה 70</div>
+    </div>
+  </div>
+
+  <!-- Admin comparison -->
+  <p class="section-title">ביצועי תומכי צ'ט</p>
+  <div class="admin-grid">
+    <div class="admin-card admin-naomi">
+      <div class="admin-name">🟢 נעמי</div>
+      <div class="admin-conv green">6.12%</div>
+      <div class="admin-sessions">
+        <strong>5 וובינרים | 26 רכישות</strong>
+        <span>3/6 → 5.08%</span>
+        <span>9/6 → 6.67%</span>
+        <span>11/6 → 7.55% ⭐</span>
+        <span>17/6 → 6.41%</span>
+        <span>21/6 → 4.89% (225 משתתפים)</span>
+      </div>
+    </div>
+    <div class="admin-card admin-yishai">
+      <div class="admin-name">🟠 ישי</div>
+      <div class="admin-conv orange">3.71%</div>
+      <div class="admin-sessions">
+        <strong>4 וובינרים | 14 רכישות</strong>
+        <span>14/6 → 3.88% (עובד חדש + מונדיאל)</span>
+        <span>15/6 → 3.77% (מונדיאל ספרד)</span>
+        <span>22/6 → 5.48% (73 משתתפים)</span>
+        <span>28/6 → 1.72% 🚨 (233 משתתפים)</span>
+      </div>
+    </div>
+    <div class="admin-card admin-bar">
+      <div class="admin-name">⚪ בר</div>
+      <div class="admin-conv" style="color:#64748b">2.98%</div>
+      <div class="admin-sessions">
+        <strong>3 וובינרים | 4 רכישות</strong>
+        <span>8/6 (40 משתתפים) → 7.50%</span>
+        <span>8/6 (69 משתתפים) → 1.45%</span>
+        <span>2/6 (34 משתתפים) → 0%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sessions table -->
+  <div class="card">
+    <div class="card-title">📅 כל הוובינרים — שבועות 1–4</div>
+    <table>
+      <thead>
+        <tr>
+          <th>תאריך</th>
+          <th>תומך צ'ט</th>
+          <th>נרשמים</th>
+          <th>משתתפים</th>
+          <th>רכישות</th>
+          <th>המרה</th>
+          <th>גורמים</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>1/6</strong></td>
+          <td>בר</td>
+          <td>263</td>
+          <td>103</td>
+          <td>4</td>
+          <td><span class="badge badge-gray">3.88%</span></td>
+          <td><span class="insight-pill">מחיר ₪2,690</span></td>
+        </tr>
+        <tr>
+          <td><strong>2/6</strong></td>
+          <td>בר</td>
+          <td>69</td>
+          <td>34</td>
+          <td>0</td>
+          <td><span class="badge badge-red">0%</span></td>
+          <td><span class="insight-pill warn">קהל קטן</span></td>
+        </tr>
+        <tr>
+          <td><strong>3/6</strong></td>
+          <td>נעמי</td>
+          <td>110</td>
+          <td>59</td>
+          <td>3</td>
+          <td><span class="badge badge-green">5.08%</span></td>
+          <td><span class="insight-pill good">מחיר חדש ₪2,240</span></td>
+        </tr>
+        <tr>
+          <td><strong>8/6</strong></td>
+          <td>בר</td>
+          <td>101</td>
+          <td>40</td>
+          <td>3</td>
+          <td><span class="badge badge-green">7.50%</span></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><strong>9/6</strong></td>
+          <td>נעמי</td>
+          <td>70</td>
+          <td>45</td>
+          <td>3</td>
+          <td><span class="badge badge-green">6.67%</span></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><strong>11/6</strong></td>
+          <td>נעמי</td>
+          <td>118</td>
+          <td>53</td>
+          <td>4</td>
+          <td><span class="badge badge-green">7.55% ⭐</span></td>
+          <td><span class="insight-pill good">שיא המרה</span></td>
+        </tr>
+        <tr>
+          <td><strong>14/6</strong></td>
+          <td>ישי</td>
+          <td>242</td>
+          <td>103</td>
+          <td>4</td>
+          <td><span class="badge badge-orange">3.88%</span></td>
+          <td><span class="insight-pill warn">מונדיאל גרמניה 20:00</span><span class="insight-pill warn">קמפיין מדולל</span></td>
+        </tr>
+        <tr>
+          <td><strong>15/6</strong></td>
+          <td>ישי</td>
+          <td>130</td>
+          <td>53</td>
+          <td>2</td>
+          <td><span class="badge badge-orange">3.77%</span></td>
+          <td><span class="insight-pill warn">מונדיאל ספרד 19:00</span></td>
+        </tr>
+        <tr>
+          <td><strong>16/6</strong></td>
+          <td>שקד</td>
+          <td>110</td>
+          <td>67</td>
+          <td>0</td>
+          <td><span class="badge badge-red">0%</span></td>
+          <td><span class="insight-pill warn">שעת צהריים 12:30</span></td>
+        </tr>
+        <tr>
+          <td><strong>17/6</strong></td>
+          <td>נעמי</td>
+          <td>207</td>
+          <td>78</td>
+          <td>5</td>
+          <td><span class="badge badge-green">6.41%</span></td>
+          <td><span class="insight-pill good">חזרה לנורמל</span></td>
+        </tr>
+        <tr style="background:#f0fdf4">
+          <td><strong>21/6</strong></td>
+          <td>נעמי</td>
+          <td>533</td>
+          <td>225</td>
+          <td>11</td>
+          <td><span class="badge badge-green">4.89%</span></td>
+          <td><span class="insight-pill good">שיא רכישות — 11</span></td>
+        </tr>
+        <tr>
+          <td><strong>22/6</strong></td>
+          <td>ישי</td>
+          <td>179</td>
+          <td>73</td>
+          <td>4</td>
+          <td><span class="badge badge-green">5.48%</span></td>
+          <td><span class="insight-pill">קהל קטן — תקין</span></td>
+        </tr>
+        <tr style="background:#fff1f2">
+          <td><strong>28/6</strong></td>
+          <td>ישי</td>
+          <td>568</td>
+          <td>233</td>
+          <td>4</td>
+          <td><span class="badge badge-red">1.72% 🚨</span></td>
+          <td><span class="insight-pill warn">מונדיאל 22:00</span><span class="insight-pill warn">הודעת "אל תשלמי"</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="two-col">
+
+    <!-- 28/6 Root cause -->
+    <div class="card">
+      <div class="card-title">🔬 ניתוח 28/6 — 3 גורמים בו-זמנית</div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot dot-red"></div>
+          <div class="timeline-content">
+            <div class="timeline-time">20:30 — וובינר מתחיל</div>
+            <div class="timeline-text">568 נרשמים, 233 משתתפים. קהל ענק — אין משחק עדיין.</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot dot-red"></div>
+          <div class="timeline-content">
+            <div class="timeline-time">21:31 — "אל תשלמי" בצ'ט הציבורי</div>
+            <div class="timeline-text">דנה כתבה פעמיים "אל תשלמי את המחיר הזה לפני שתבדקי". 233 אנשים ראו. ישי לא הגיב.</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot dot-red"></div>
+          <div class="timeline-content">
+            <div class="timeline-time">21:40 — Pitch מתחיל (דקה 70)</div>
+            <div class="timeline-text">חלון הרכישה נפתח — אבל הודעת "אל תשלמי" כבר קבעה את הטון.</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot dot-red"></div>
+          <div class="timeline-content">
+            <div class="timeline-time">22:00 — משחק מונדיאל מתחיל (דקה 90)</div>
+            <div class="timeline-text">20 דקות בלבד מהפיץ' עד לתחילת המשחק. אנשים שהיו "מתלבטים" יצאו לצפות במשחק.</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot dot-orange"></div>
+          <div class="timeline-content">
+            <div class="timeline-time">22:27 — וובינר מסתיים</div>
+            <div class="timeline-text">תוצאה: 4 רכישות. הפסד משוער: ₪16,576 vs ביצועי נעמי.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pitch timing -->
+    <div class="card">
+      <div class="card-title">📉 אובדן קהל לפני ה-Pitch</div>
+      <p style="font-size:13px;color:#555;margin-bottom:16px">מתוך ניתוח עקומת הנוכחות (Aggregate — כל הסשנים)</p>
+      <table>
+        <thead>
+          <tr>
+            <th>דקה</th>
+            <th>נוכחים</th>
+            <th>% מהשיא</th>
+            <th>הערה</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>20</td>
+            <td>4,400</td>
+            <td><span class="badge badge-green">100% — שיא</span></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td>50</td>
+            <td>4,150</td>
+            <td>94%</td>
+            <td style="color:#16a34a;font-size:12px">Pitch כאן → +30%</td>
+          </tr>
+          <tr>
+            <td>60</td>
+            <td>3,950</td>
+            <td>90%</td>
+            <td style="color:#16a34a;font-size:12px">Pitch כאן → +23%</td>
+          </tr>
+          <tr style="background:#fff1f2">
+            <td><strong>70 ← עכשיו</strong></td>
+            <td><strong>3,200</strong></td>
+            <td><span class="badge badge-orange">73%</span></td>
+            <td style="color:#dc2626;font-size:12px">אובדן 1,200 אנשים</td>
+          </tr>
+          <tr>
+            <td>90</td>
+            <td>1,750</td>
+            <td><span class="badge badge-red">40%</span></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td>115</td>
+            <td>1,000</td>
+            <td><span class="badge badge-red">23%</span></td>
+            <td>סוף הוובינר</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="margin-top:14px;padding:10px 14px;background:#fff7ed;border-radius:8px;font-size:12px;color:#9a3412">
+        <strong>Bottom line:</strong> הזזת הפיץ' מדקה 70 לדקה 55 = עוד ~950 אנשים שרואים את ההצעה. בהמרה של 5% = <strong>~47 רכישות נוספות לאורך זמן</strong>.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Naomi's technique -->
+  <div class="card">
+    <div class="card-title">🧠 הנוסחה של נעמי — מה היא עושה אחרת</div>
+    <div class="two-col">
+      <div>
+        <p style="font-size:12px;color:#888;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.04em">מה נעמי עושה</p>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-dot dot-green"></div>
+            <div class="timeline-content">
+              <div class="timeline-text"><strong>תשובות קצרות וחיוביות</strong> — "גם גם :)" במקום הסבר ארוך</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot dot-green"></div>
+            <div class="timeline-content">
+              <div class="timeline-text"><strong>מכבה התנגדויות מוקדם</strong> — "המאיץ מתאים לכל מי שמחפש עבודה" לפני שזה מתפשט</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot dot-green"></div>
+            <div class="timeline-content">
+              <div class="timeline-text"><strong>מנהלת ציפיות</strong> — "כמה דקות עוד ודוד יגיע למחירים :)"</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot dot-green"></div>
+            <div class="timeline-content">
+              <div class="timeline-text"><strong>מגיבה להודעות שליליות</strong> — לא מאפשרת שיעמדו ללא מענה</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p style="font-size:12px;color:#888;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.04em">סקריפט לישי — הודעות מוכנות</p>
+        <div class="script-box">
+          <div class="script-label">כש"זה רק להייטק?"</div>
+          <div class="script-line">גם גם :) המאיץ מתאים לכל מי שמחפש עבודה</div>
+          <br>
+          <div class="script-label">כש"האם המאמן הוא AI?"</div>
+          <div class="script-line">מאמנת אמיתית, לא AI :)</div>
+          <br>
+          <div class="script-label">כש"אל תשלמו / זה רק מכירות"</div>
+          <div class="script-line">[שם], שאלה לגיטימית — בדיוק בגלל זה יש לנו [ערבות]. מה הספק הספציפי שלך?</div>
+          <br>
+          <div class="script-label">לפני חשיפת המחיר</div>
+          <div class="script-line">כמה דקות עוד ודוד יגיע למחירים :)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recommendations -->
+  <p class="section-title">המלצות לפי עדיפות</p>
+  <div class="rec-list">
+    <div class="rec rec-p1">
+      <div class="rec-icon">🔴</div>
+      <div>
+        <div class="rec-title">נעמי על כל סשן עם 150+ משתתפים — מיידי</div>
+        <div class="rec-desc">הנתונים ברורים: נעמי עם 225 משתתפים → 4.89% (11 רכישות). ישי עם 233 משתתפים → 1.72% (4 רכישות). הפרש של ₪15,680 בסשן אחד. לא עניין של מיומנות בלבד — עניין של סגנון שמתאים לסקייל.</div>
+        <div class="rec-impact impact-high">השפעה: מונע הפסד של ₪10,000–₪16,000 לסשן גדול</div>
+      </div>
+    </div>
+    <div class="rec rec-p1">
+      <div class="rec-icon">🔴</div>
+      <div>
+        <div class="rec-title">הזזת ה-Pitch מדקה 70 לדקה 55 — Option A: Overlay</div>
+        <div class="rec-desc">הוספת CTA button בפלטפורמה בדקה 55 (ללא עריכת וידאו). "מוכן להצטרף? לחץ לפרטים". תופס ~950 אנשים שיוצאים בין דקה 55–70 לפני שהם בכלל רואים את ההצעה.</div>
+        <div class="rec-impact impact-high">השפעה: +20-30% חשיפה להצעה. לא דורש עריכה.</div>
+      </div>
+    </div>
+    <div class="rec rec-p1">
+      <div class="rec-icon">🔴</div>
+      <div>
+        <div class="rec-title">הזזת ה-Pitch מדקה 70 לדקה 55 — Option B: עריכת וידאו</div>
+        <div class="rec-desc">קיצור 10–15 דקות מהחלק הראשון של הוובינר. הפיץ' עובר לדקה 55. דורש עורך וידאו, אבל זו התיקון הגדול ביותר שניתן לעשות בוובינר עצמו.</div>
+        <div class="rec-impact impact-high">השפעה: +20-30% יותר אנשים רואים את ההצעה בכל סשן</div>
+      </div>
+    </div>
+    <div class="rec rec-p2">
+      <div class="rec-icon">🟡</div>
+      <div>
+        <div class="rec-title">בדיקת לוח מונדיאל לפני כל וובינר — עד 19/7</div>
+        <div class="rec-desc">14/6: גרמניה 20:00 → ירידה בהגעה. 15/6: ספרד 19:00 → ירידה בהגעה. 28/6: משחק 22:00 → ירידה בחלון הרכישה. לא לקבוע וובינרים שמתנגשים עם משחקים גדולים.</div>
+        <div class="rec-impact impact-med">השפעה: מונע אובדן של 2–4 רכישות לסשן</div>
+      </div>
+    </div>
+    <div class="rec rec-p2">
+      <div class="rec-icon">🟡</div>
+      <div>
+        <div class="rec-title">סקריפט לישי + אימון — השבוע</div>
+        <div class="rec-desc">3 הודעות מוכנות לתרחישים הנפוצים. הודעה שלילית → מענה תוך 60 שניות. ישי תקין עם קהל קטן (22/6: 5.48%) — המיומנות הדרושה היא ניהול המון ברמה האישית.</div>
+        <div class="rec-impact impact-med">השפעה: מסיר סיכון של Dana-type sabotage</div>
+      </div>
+    </div>
+    <div class="rec rec-p3">
+      <div class="rec-icon">🔵</div>
+      <div>
+        <div class="rec-title">Pin "לא רק הייטק" בתחילת כל סשן</div>
+        <div class="rec-desc">ההתנגדות "זה רק להייטק?" הופיעה ב-4+ סשנים. הדבקת הודעה אחת בתחילת הצ'ט מסירה אותה לפני שהיא הופכת לקורוס. הנוסחה של נעמי: "המאיץ מתאים לכל מי שמחפש עבודה — לא רק הייטק :)"</div>
+        <div class="rec-impact impact-low">השפעה: מקטין רעש בצ'ט, מאפשר לתומך להתמקד בסגירות</div>
+      </div>
+    </div>
+    <div class="rec rec-p3">
+      <div class="rec-icon">🔵</div>
+      <div>
+        <div class="rec-title">הפסקת שידורים בשעת 12:30</div>
+        <div class="rec-desc">16/6 בצהריים: 5 אנשים עם 94-98% צפייה לחצו על ההצעה — 0 קנו. אחד יצא לפגישת עבודה תוך כדי. אנשים לא מקבלים החלטות כספיות של ₪2,240 מאמצע יום עבודה.</div>
+        <div class="rec-impact impact-low">השפעה: מונע 0%-conversion sessions</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
