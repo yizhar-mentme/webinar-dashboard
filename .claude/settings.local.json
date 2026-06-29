@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-Command python -ErrorAction SilentlyContinue; Get-Command python3 -ErrorAction SilentlyContinue; Get-Command py -ErrorAction SilentlyContinue; $env:PATH -split ';' | Where-Object { $_ -match 'python|conda|miniconda|anaconda' })",
+      "PowerShell(node --version 2>$null)",
+      "PowerShell(npm --version 2>$null)",
+      "PowerShell(\\(Get-ChildItem \"C:\\\\Users\\\\yizha\\\\Downloads\" -File\\).Count)",
+      "WebFetch(domain:yizhar-mentme.github.io)",
+      "Bash(py --version)",
+      "Bash(where python3 *)",
+      "Bash(where py *)",
+      "Bash(python3 -c ' *)",
+      "PowerShell(python3 -c \"print\\('hello'\\)\")"
+    ]
+  }
+}

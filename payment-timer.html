@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>תשלום מאובטח</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #0f0f1a;
+    color: #fff;
+    min-height: 100vh;
+  }
+
+  /* ── GENERATOR SCREEN ── */
+  #generator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    gap: 24px;
+    padding: 32px;
+  }
+
+  #generator h1 {
+    font-size: 1.8rem;
+    color: #e0c97f;
+  }
+
+  #generator p {
+    color: #aaa;
+    text-align: center;
+    max-width: 420px;
+  }
+
+  .gen-card {
+    background: #1a1a2e;
+    border: 1px solid #333;
+    border-radius: 16px;
+    padding: 32px;
+    width: 100%;
+    max-width: 440px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .field label {
+    display: block;
+    margin-bottom: 8px;
+    color: #ccc;
+    font-size: 0.9rem;
+  }
+
+  .field input, .field select {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1px solid #444;
+    background: #0f0f1a;
+    color: #fff;
+    font-size: 1rem;
+  }
+
+  .field input:focus, .field select:focus {
+    outline: none;
+    border-color: #e0c97f;
+  }
+
+  .btn-generate {
+    background: linear-gradient(135deg, #e0c97f, #c8a84b);
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .btn-generate:hover { opacity: 0.88; }
+
+  #result-box {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  #result-box label {
+    color: #aaa;
+    font-size: 0.85rem;
+  }
+
+  #link-output {
+    background: #0f0f1a;
+    border: 1px solid #555;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.8rem;
+    color: #7cf;
+    word-break: break-all;
+    direction: ltr;
+    text-align: left;
+  }
+
+  .btn-copy {
+    background: #2a2a3e;
+    border: 1px solid #555;
+    color: #fff;
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+  }
+
+  .btn-copy:hover { background: #3a3a5e; }
+  .btn-copy.copied { background: #1a4a2e; border-color: #4caf50; color: #4caf50; }
+
+  /* ── PAYMENT SCREEN ── */
+  #payment-screen {
+    display: none;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  .timer-bar {
+    background: #1a1a2e;
+    border-bottom: 1px solid #333;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .timer-label {
+    color: #aaa;
+    font-size: 0.85rem;
+  }
+
+  .timer-display {
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 2px;
+    color: #e0c97f;
+    transition: color 0.3s;
+  }
+
+  .timer-display.urgent { color: #ff4444; animation: pulse 1s infinite; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .urgency-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #e0c97f;
+    animation: blink 2s infinite;
+  }
+
+  .urgency-dot.urgent { background: #ff4444; animation: blink 0.8s infinite; }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.2; }
+  }
+
+  #payment-frame {
+    flex: 1;
+    border: none;
+    width: 100%;
+  }
+
+  /* ── EXPIRED SCREEN ── */
+  #expired-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    gap: 20px;
+    padding: 32px;
+    text-align: center;
+  }
+
+  .expired-icon {
+    font-size: 5rem;
+  }
+
+  #expired-screen h1 {
+    font-size: 2rem;
+    color: #ff4444;
+  }
+
+  #expired-screen p {
+    color: #aaa;
+    max-width: 360px;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<!-- GENERATOR (shown when no ?expires param) -->
+<div id="generator">
+  <h1>🔐 יצירת קישור עם טיימר</h1>
+  <p>בחר כמה זמן יהיה ללקוח לסיים את הרכישה, ולחץ על "צור קישור"</p>
+
+  <div class="gen-card">
+    <div class="field">
+      <label>זמן לתפוגה</label>
+      <select id="duration-select">
+        <option value="1">שעה אחת</option>
+        <option value="2">שעתיים</option>
+        <option value="3" selected>3 שעות</option>
+        <option value="6">6 שעות</option>
+        <option value="12">12 שעות</option>
+        <option value="24">24 שעות</option>
+        <option value="custom">מותאם אישית...</option>
+      </select>
+    </div>
+
+    <div class="field" id="custom-field" style="display:none">
+      <label>מספר שעות</label>
+      <input type="number" id="custom-hours" min="0.5" max="72" step="0.5" placeholder="למשל: 1.5">
+    </div>
+
+    <div class="field">
+      <label>קישור דף המכירה (רב מסר)</label>
+      <input type="text" id="payment-url-input"
+        value=""
+        placeholder="https://ravmesser.com/your-page">
+    </div>
+
+    <button class="btn-generate" onclick="generateLink()">צור קישור ←</button>
+
+    <div id="result-box">
+      <label>קישור לשליחה ללקוח:</label>
+      <div id="link-output"></div>
+      <button class="btn-copy" id="copy-btn" onclick="copyLink()">📋 העתק קישור</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAYMENT SCREEN -->
+<div id="payment-screen">
+  <div class="timer-bar">
+    <span class="timer-label">⏳ ההצעה תפוג בעוד:</span>
+    <span class="timer-display" id="timer-display">00:00:00</span>
+    <div class="urgency-dot" id="urgency-dot"></div>
+  </div>
+  <iframe id="payment-frame" src="" allowpaymentrequest></iframe>
+</div>
+
+<!-- EXPIRED SCREEN -->
+<div id="expired-screen">
+  <div class="expired-icon">⏰</div>
+  <h1>ההצעה פגה</h1>
+  <p>חלון ההרשמה נסגר.<br>צור קשר איתנו כדי לבדוק אפשרות לפתיחה מחדש.</p>
+</div>
+
+<script>
+  const params = new URLSearchParams(location.search);
+  const expiresParam = params.get('expires');
+  const paymentParam = params.get('url');
+
+  // ── DURATION SELECT ──
+  document.getElementById('duration-select').addEventListener('change', function() {
+    document.getElementById('custom-field').style.display =
+      this.value === 'custom' ? 'block' : 'none';
+  });
+
+  // ── GENERATE LINK ──
+  function generateLink() {
+    const select = document.getElementById('duration-select');
+    let hours = select.value === 'custom'
+      ? parseFloat(document.getElementById('custom-hours').value)
+      : parseFloat(select.value);
+
+    if (!hours || hours <= 0) {
+      alert('אנא הכנס מספר שעות תקין');
+      return;
+    }
+
+    const paymentUrl = document.getElementById('payment-url-input').value.trim();
+    if (!paymentUrl) {
+      alert('אנא הכנס קישור תשלום');
+      return;
+    }
+
+    const expiresAt = Math.floor(Date.now() / 1000) + Math.round(hours * 3600);
+    const thisPage = location.origin + location.pathname;
+    const link = `${thisPage}?expires=${expiresAt}&url=${encodeURIComponent(paymentUrl)}`;
+
+    document.getElementById('link-output').textContent = link;
+    const rb = document.getElementById('result-box');
+    rb.style.display = 'flex';
+
+    // Reset copy button
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = '📋 העתק קישור';
+    btn.classList.remove('copied');
+  }
+
+  function copyLink() {
+    const text = document.getElementById('link-output').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('copy-btn');
+      btn.textContent = '✅ הועתק!';
+      btn.classList.add('copied');
+    });
+  }
+
+  // ── PAYMENT / EXPIRED LOGIC ──
+  if (expiresParam) {
+    const expiresAt = parseInt(expiresParam, 10) * 1000; // ms
+    const paymentUrl = paymentParam
+      ? decodeURIComponent(paymentParam)
+      : 'https://secure.cardcom.solutions/EA/EA5/QXFkUEH0HkGfymCh2CsQ/PaymentSP?ref=wa_payment_sales';
+
+    document.getElementById('generator').style.display = 'none';
+
+    if (Date.now() >= expiresAt) {
+      // Already expired
+      document.getElementById('expired-screen').style.display = 'flex';
+    } else {
+      // Show payment
+      document.getElementById('payment-screen').style.display = 'flex';
+      document.getElementById('payment-frame').src = paymentUrl;
+
+      const timerEl = document.getElementById('timer-display');
+      const dotEl = document.getElementById('urgency-dot');
+
+      function tick() {
+        const remaining = expiresAt - Date.now();
+        if (remaining <= 0) {
+          document.getElementById('payment-screen').style.display = 'none';
+          document.getElementById('expired-screen').style.display = 'flex';
+          return;
+        }
+
+        const h = Math.floor(remaining / 3600000);
+        const m = Math.floor((remaining % 3600000) / 60000);
+        const s = Math.floor((remaining % 60000) / 1000);
+
+        timerEl.textContent =
+          String(h).padStart(2,'0') + ':' +
+          String(m).padStart(2,'0') + ':' +
+          String(s).padStart(2,'0');
+
+        const urgent = remaining < 10 * 60 * 1000; // last 10 min
+        timerEl.classList.toggle('urgent', urgent);
+        dotEl.classList.toggle('urgent', urgent);
+
+        setTimeout(tick, 1000);
+      }
+
+      tick();
+    }
+  }
+</script>
+</body>
+</html>

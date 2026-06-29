@@ -1,0 +1,241 @@
+<!--
+  הדבק את כל הקוד הזה בבלוק HTML ברב מסר
+  שנה את HOURS = 3 אם תרצה פחות או יותר שעות
+-->
+
+<style>
+#offer-timer-wrap * {
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  direction: rtl;
+}
+
+#offer-timer-wrap {
+  text-align: center;
+  padding: 32px 16px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ── Urgency headline ── */
+.ot-urgency {
+  font-size: 1rem;
+  color: #888;
+  margin-bottom: 10px;
+  letter-spacing: 0.5px;
+}
+
+/* ── Timer display ── */
+.ot-timer-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #111;
+  border-radius: 60px;
+  padding: 12px 28px;
+  margin-bottom: 24px;
+}
+
+.ot-timer-label {
+  color: #aaa;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.ot-clock {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: 4px;
+  font-variant-numeric: tabular-nums;
+  color: #f0c040;
+  transition: color 0.4s;
+  white-space: nowrap;
+}
+
+.ot-clock.urgent {
+  color: #ff3b3b;
+  animation: ot-pulse 0.9s infinite;
+}
+
+@keyframes ot-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.35; }
+}
+
+.ot-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #f0c040;
+  flex-shrink: 0;
+  animation: ot-blink 1.8s infinite;
+}
+
+.ot-dot.urgent {
+  background: #ff3b3b;
+  animation: ot-blink 0.7s infinite;
+}
+
+@keyframes ot-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.1; }
+}
+
+/* ── Progress bar ── */
+.ot-progress-wrap {
+  background: #222;
+  border-radius: 99px;
+  height: 6px;
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto 28px;
+  overflow: hidden;
+}
+
+.ot-progress-bar {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #f0c040, #e08000);
+  transition: width 1s linear, background 0.4s;
+}
+
+.ot-progress-bar.urgent {
+  background: linear-gradient(90deg, #ff3b3b, #cc0000);
+}
+
+/* ── CTA button ── */
+.ot-cta-btn {
+  display: inline-block;
+  background: linear-gradient(135deg, #f0c040 0%, #c88000 100%);
+  color: #000 !important;
+  text-decoration: none !important;
+  font-size: 1.2rem;
+  font-weight: 800;
+  padding: 18px 48px;
+  border-radius: 60px;
+  cursor: pointer;
+  box-shadow: 0 6px 28px rgba(240,192,64,0.45);
+  transition: transform 0.15s, box-shadow 0.15s;
+  letter-spacing: 0.3px;
+}
+
+.ot-cta-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 36px rgba(240,192,64,0.6);
+}
+
+.ot-sub {
+  margin-top: 12px;
+  font-size: 0.8rem;
+  color: #999;
+}
+
+/* ── Expired ── */
+.ot-expired {
+  display: none;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 18px;
+  padding: 36px 28px;
+  color: #ccc;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.ot-expired-icon { font-size: 3.5rem; margin-bottom: 12px; }
+.ot-expired h3   { color: #ff4444; font-size: 1.4rem; margin-bottom: 10px; }
+.ot-expired p    { line-height: 1.7; font-size: 0.95rem; }
+</style>
+
+<div id="offer-timer-wrap">
+
+  <!-- Live offer section -->
+  <div id="ot-live">
+    <p class="ot-urgency">⚡ ההצעה זמינה לזמן מוגבל בלבד</p>
+
+    <div class="ot-timer-box">
+      <span class="ot-timer-label">נסגר בעוד:</span>
+      <span class="ot-clock" id="ot-clock">--:--:--</span>
+      <div class="ot-dot" id="ot-dot"></div>
+    </div>
+
+    <div class="ot-progress-wrap">
+      <div class="ot-progress-bar" id="ot-bar"></div>
+    </div>
+
+    <a class="ot-cta-btn" id="ot-cta"
+       href="https://secure.cardcom.solutions/EA/EA5/QXFkUEH0HkGfymCh2CsQ/PaymentSP?ref=wa_payment_sales"
+       target="_blank">
+      אני רוצה להצטרף עכשיו ←
+    </a>
+
+    <p class="ot-sub">לחיצה תעביר אותך לדף התשלום המאובטח</p>
+  </div>
+
+  <!-- Expired section -->
+  <div class="ot-expired" id="ot-expired">
+    <div class="ot-expired-icon">⏰</div>
+    <h3>חלון ההצטרפות נסגר</h3>
+    <p>ההצעה המיוחדת כבר אינה זמינה.<br>צור קשר איתנו ונבדוק יחד אם ניתן עדיין לעזור.</p>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  var HOURS        = 3;              // ← שנה כאן את מספר השעות
+  var STORAGE_KEY  = 'ot_expires_v1';
+
+  var clockEl    = document.getElementById('ot-clock');
+  var dotEl      = document.getElementById('ot-dot');
+  var barEl      = document.getElementById('ot-bar');
+  var liveEl     = document.getElementById('ot-live');
+  var expiredEl  = document.getElementById('ot-expired');
+
+  /* Set or read expiry from localStorage */
+  var stored = localStorage.getItem(STORAGE_KEY);
+  var expiresMs;
+
+  if (!stored) {
+    expiresMs = Date.now() + HOURS * 3600 * 1000;
+    localStorage.setItem(STORAGE_KEY, String(expiresMs));
+  } else {
+    expiresMs = parseInt(stored, 10);
+  }
+
+  var totalMs = HOURS * 3600 * 1000;
+
+  function showExpired() {
+    liveEl.style.display    = 'none';
+    expiredEl.style.display = 'block';
+  }
+
+  if (Date.now() >= expiresMs) { showExpired(); return; }
+
+  function fmt(n) { return String(n).padStart(2, '0'); }
+
+  function tick() {
+    var rem = expiresMs - Date.now();
+    if (rem <= 0) { showExpired(); return; }
+
+    var h = Math.floor(rem / 3600000);
+    var m = Math.floor((rem % 3600000) / 60000);
+    var s = Math.floor((rem % 60000) / 1000);
+
+    clockEl.textContent = fmt(h) + ':' + fmt(m) + ':' + fmt(s);
+
+    /* Progress bar — shrinks from 100% to 0% */
+    var pct = Math.max(0, (rem / totalMs) * 100);
+    barEl.style.width = pct + '%';
+
+    var urgent = rem < 10 * 60 * 1000; /* last 10 min */
+    clockEl.classList.toggle('urgent', urgent);
+    dotEl.classList.toggle('urgent', urgent);
+    barEl.classList.toggle('urgent', urgent);
+
+    setTimeout(tick, 1000);
+  }
+
+  tick();
+})();
+</script>

@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>משפך תקציב וובינר</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #1a1a2e; direction: rtl; font-size: 13px; }
+
+header {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+  color: white; padding: 24px 36px; display: flex; align-items: center; justify-content: space-between;
+}
+header h1 { font-size: 22px; font-weight: 700; }
+header p { font-size: 12px; opacity: 0.6; margin-top: 3px; }
+
+.container { max-width: 1500px; margin: 0 auto; padding: 24px 16px; }
+
+/* ── Settings ── */
+.settings-panel {
+  background: #fff; border-radius: 12px; padding: 18px 24px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.07); margin-bottom: 22px;
+  border-right: 5px solid #0f3460;
+}
+.settings-panel h2 { font-size: 14px; font-weight: 700; margin-bottom: 14px; color: #0f3460; }
+.settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.setting-item label { display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px; font-weight: 600; }
+.setting-item input {
+  width: 100%; padding: 7px 9px; border: 1.5px solid #e5e7eb; border-radius: 7px;
+  font-size: 13px; font-weight: 700; color: #0055cc; text-align: center; background: #f8faff;
+}
+.setting-item input:focus { outline: none; border-color: #0f3460; background: #eef3ff; }
+
+/* ── KPI ── */
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 10px; margin-bottom: 22px; }
+.kpi-card {
+  background: #fff; border-radius: 11px; padding: 14px 12px; text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-top: 4px solid #e94560;
+}
+.kpi-card.blue { border-top-color: #3b82f6; }
+.kpi-card.green { border-top-color: #10b981; }
+.kpi-card.orange { border-top-color: #f59e0b; }
+.kpi-card.purple { border-top-color: #8b5cf6; }
+.kpi-card.dark { border-top-color: #0f3460; }
+.kpi-label { font-size: 10px; color: #6b7280; margin-bottom: 5px; font-weight: 600; }
+.kpi-value { font-size: 20px; font-weight: 800; }
+.kpi-sub { font-size: 10px; color: #9ca3af; margin-top: 2px; }
+
+/* ── Charts ── */
+.charts-row { display: grid; grid-template-columns: 1.1fr 1fr 1fr; gap: 16px; margin-bottom: 22px; }
+@media (max-width: 900px) { .charts-row { grid-template-columns: 1fr; } }
+.chart-card { background: #fff; border-radius: 12px; padding: 18px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+.chart-card h3 { font-size: 13px; font-weight: 700; margin-bottom: 12px; color: #374151; }
+.chart-wrap { position: relative; height: 220px; }
+.funnel-stage { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+.funnel-label { min-width: 110px; font-size: 11px; font-weight: 600; color: #374151; }
+.funnel-bar-wrap { flex: 1; background: #f3f4f6; border-radius: 5px; height: 30px; overflow: hidden; }
+.funnel-bar { height: 100%; border-radius: 5px; display: flex; align-items: center; justify-content: flex-end; transition: width 0.4s; }
+.funnel-bar span { font-size: 11px; font-weight: 700; color: #fff; padding: 0 8px; white-space: nowrap; }
+.funnel-pct { min-width: 70px; font-size: 11px; color: #9ca3af; }
+
+/* ── Week block ── */
+.week-block { background: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); margin-bottom: 22px; overflow: hidden; }
+.week-header {
+  background: #f8faff; padding: 14px 20px; display: flex; align-items: center; gap: 14px;
+  border-bottom: 2px solid #e5e7eb;
+}
+.week-badge { background: #0f3460; color: #fff; padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.week-header label { font-size: 11px; color: #6b7280; font-weight: 600; white-space: nowrap; }
+.week-header .cpl-input {
+  padding: 5px 8px; border: 1.5px solid #dbeafe; border-radius: 7px;
+  font-size: 13px; font-weight: 700; color: #0055cc; width: 90px; text-align: center; background: #f0f7ff;
+}
+.week-header .cpl-input:focus { outline: none; border-color: #0f3460; }
+.week-header .cpl-note { font-size: 10px; color: #9ca3af; }
+.add-wb-btn {
+  margin-right: auto; background: #eef3ff; color: #0f3460; border: none; cursor: pointer;
+  padding: 5px 12px; border-radius: 7px; font-size: 12px; font-weight: 600; transition: background 0.2s;
+}
+.add-wb-btn:hover { background: #c7d9f8; }
+.del-week-btn { background: none; border: none; cursor: pointer; color: #d1d5db; font-size: 15px; padding: 2px; }
+.del-week-btn:hover { color: #dc2626; }
+
+/* ── Webinar table ── */
+.table-wrap { overflow-x: auto; padding: 0 0 4px; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+
+/* Section headers */
+.sec-header { background: #f1f5f9; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; color: #64748b; padding: 5px 8px; text-align: center; border-bottom: 1px solid #e2e8f0; }
+.sec-funnel { background: #eff6ff; color: #1d4ed8; }
+.sec-extra { background: #f0fdf4; color: #166534; }
+.sec-finance { background: #fefce8; color: #854d0e; }
+
+thead th {
+  padding: 8px 6px; text-align: center; font-weight: 700; color: #374151;
+  border-bottom: 2px solid #e5e7eb; white-space: nowrap; background: #fafafa;
+}
+thead th.input-h { color: #1d4ed8; background: #f0f7ff; }
+thead th.calc-h { color: #6b7280; font-weight: 600; }
+thead th.extra-h { color: #166534; background: #f0fdf4; }
+thead th.fin-h { color: #854d0e; background: #fefce8; }
+thead th.total-h { color: #0f3460; background: #eef3ff; font-weight: 800; }
+
+tbody tr { transition: background 0.12s; }
+tbody tr:hover { background: #fafbff; }
+tbody td { padding: 6px 5px; text-align: center; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
+
+td input[type="number"], td input[type="text"] {
+  width: 82px; padding: 4px 5px; border: 1.5px solid #dbeafe; border-radius: 6px;
+  font-size: 12px; font-weight: 600; color: #1d4ed8; text-align: center; background: #f0f7ff;
+}
+td input[type="number"]:focus, td input[type="text"]:focus { outline: none; border-color: #0f3460; background: #e8f0fe; }
+td input.extra-in { border-color: #bbf7d0; background: #f0fdf4; color: #166534; }
+td input.extra-in:focus { border-color: #16a34a; }
+
+td input[type="date"] {
+  width: 130px; padding: 4px 6px; border: 1.5px solid #dbeafe; border-radius: 6px;
+  font-size: 12px; font-weight: 600; color: #1d4ed8; background: #f0f7ff;
+  cursor: pointer;
+}
+td input[type="date"]:focus { outline: none; border-color: #0f3460; }
+
+.name-in { width: 88px !important; }
+.time-in { width: 72px !important; }
+
+.calc-cell { color: #374151; font-weight: 500; }
+.pct-cell { color: #7c3aed; font-weight: 700; }
+.money-green { color: #059669; font-weight: 600; }
+.money-red { color: #dc2626; font-weight: 600; }
+.profit-pos { color: #059669; font-weight: 800; }
+.profit-neg { color: #dc2626; font-weight: 800; }
+.cac-cell { color: #0f3460; font-weight: 700; }
+.bold-blue { color: #1d4ed8; font-weight: 800; font-size: 13px; }
+
+tfoot td {
+  background: #eef3ff; font-weight: 700; padding: 8px 5px; border-top: 2px solid #0f3460;
+  color: #0f3460; text-align: center;
+}
+tfoot td.tf-green { color: #059669; }
+tfoot td.tf-red { color: #dc2626; }
+tfoot td.tf-profit-pos { color: #059669; font-size: 13px; }
+tfoot td.tf-profit-neg { color: #dc2626; font-size: 13px; }
+
+.del-row-btn { background: none; border: none; cursor: pointer; color: #d1d5db; font-size: 13px; }
+.del-row-btn:hover { color: #dc2626; }
+
+/* ── Add week ── */
+.add-week-btn {
+  display: block; width: 100%; padding: 12px; text-align: center;
+  background: #fff; border: 2px dashed #cbd5e1; border-radius: 12px;
+  color: #64748b; font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: all 0.2s; margin-bottom: 22px;
+}
+.add-week-btn:hover { border-color: #0f3460; color: #0f3460; background: #eef3ff; }
+
+.section-title {
+  font-size: 17px; font-weight: 700; margin-bottom: 14px; color: #1a1a2e;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-title::before { content:''; display:inline-block; width:4px; height:18px; background:#e94560; border-radius:3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>משפך תקציב וובינר</h1>
+    <p>עדכון ידני · חישוב אוטומטי · ניתוח שבועי</p>
+  </div>
+  <div style="color:#fff;opacity:0.65;font-size:12px;" id="lastUpdated"></div>
+</header>
+
+<div class="container">
+
+  <!-- Settings -->
+  <div class="settings-panel">
+    <h2>⚙️ הגדרות גלובליות</h2>
+    <div class="settings-grid">
+      <div class="setting-item">
+        <label>מחיר הקורס כולל מע"מ (₪)</label>
+        <input type="number" id="g_price" value="2690" oninput="recalcAll()">
+      </div>
+      <div class="setting-item">
+        <label>מע"מ (%)</label>
+        <input type="number" id="g_vat" value="17" oninput="recalcAll()">
+      </div>
+      <div class="setting-item">
+        <label>עמלת סליקה (%)</label>
+        <input type="number" id="g_cc" value="0.95" step="0.01" oninput="recalcAll()">
+      </div>
+      <div class="setting-item">
+        <label>עמלת EZ לרכישה (₪)</label>
+        <input type="number" id="g_ez_per" value="80" oninput="recalcAll()">
+      </div>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <h2 class="section-title">סיכום כולל</h2>
+  <div class="kpi-row">
+    <div class="kpi-card blue"><div class="kpi-label">סה"כ נרשמים</div><div class="kpi-value" id="k_reg">—</div></div>
+    <div class="kpi-card purple"><div class="kpi-label">סה"כ משתתפים</div><div class="kpi-value" id="k_att">—</div><div class="kpi-sub" id="k_att_p">—</div></div>
+    <div class="kpi-card orange"><div class="kpi-label">רכישות וובינר</div><div class="kpi-value" id="k_pur">—</div></div>
+    <div class="kpi-card green"><div class="kpi-label">סה"כ לקוחות (כולל הקלטה)</div><div class="kpi-value" id="k_total_pur">—</div></div>
+    <div class="kpi-card green"><div class="kpi-label">הכנסה ללא מע"מ</div><div class="kpi-value" id="k_rev">—</div></div>
+    <div class="kpi-card" id="k_profit_card"><div class="kpi-label">סה"כ רווח / הפסד</div><div class="kpi-value" id="k_profit">—</div></div>
+    <div class="kpi-card dark"><div class="kpi-label">CAC ממוצע</div><div class="kpi-value" id="k_cac">—</div><div class="kpi-sub">עלות רכישת לקוח</div></div>
+    <div class="kpi-card"><div class="kpi-label">המרה ממוצע</div><div class="kpi-value" id="k_conv">—</div><div class="kpi-sub">מתוך משתתפים</div></div>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-row">
+    <div class="chart-card">
+      <h3>🔽 משפך: נרשמים ← לקוחות</h3>
+      <div id="funnelDiv" style="padding-top:8px;"></div>
+    </div>
+    <div class="chart-card">
+      <h3>🥧 פירוט עלויות</h3>
+      <div class="chart-wrap"><canvas id="costPie"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>📊 רווח / הפסד לפי וובינר</h3>
+      <div class="chart-wrap"><canvas id="profitBar"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Weeks -->
+  <h2 class="section-title">נתוני וובינרים</h2>
+  <div id="weeksContainer"></div>
+  <button class="add-week-btn" onclick="addWeek()">＋ הוסף שבוע חדש</button>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────
+// State
+// ─────────────────────────────────────────────────────
+let weeks = [
+  {
+    id: 1, label: 'שבוע 1 — יוני 2026', costPerLead: 0,
+    webinars: [
+      { name: 'וובינר 1', date: '2026-06-01', time: '20:00', reg: 0, att: 0, pur: 0, recPur: 0, callPur: 0, extPur: 0, platCost: 0 },
+      { name: 'וובינר 2', date: '2026-06-02', time: '12:00', reg: 0, att: 0, pur: 0, recPur: 0, callPur: 0, extPur: 0, platCost: 0 },
+      { name: 'וובינר 3', date: '2026-06-04', time: '',      reg: 0, att: 0, pur: 0, recPur: 0, callPur: 0, extPur: 0, platCost: 0 },
+    ]
+  }
+];
+let nextWeekId = 2;
+let costPieInst = null, profitBarInst = null;
+
+// ─────────────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────────────
+const gv = id => parseFloat(document.getElementById(id).value) || 0;
+const priceEx = () => gv('g_price') / (1 + gv('g_vat') / 100);
+const fmt = n => '₪' + Math.round(n).toLocaleString('he-IL');
+const fmtN = n => Math.round(n).toLocaleString('he-IL');
+const fmtP = n => (n * 100).toFixed(1) + '%';
+
+function calcRow(w, weekTotReg, cpl) {
+  const price = priceEx();
+  const totalPur = w.pur + w.recPur + w.callPur + w.extPur;
+  const rev = totalPur * price;
+  const ccFee = totalPur * price * (gv('g_cc') / 100);
+  const ezFee = (w.pur + w.recPur) * gv('g_ez_per');           // וובינר + הקלטה × 80
+  const campCost = weekTotReg > 0 ? (w.reg / weekTotReg) * cpl * weekTotReg : 0;
+  const platCost = w.platCost;
+  const totalCost = ccFee + ezFee + campCost + platCost;
+  const profit = rev - totalCost;
+  const cac = totalPur > 0 ? (ccFee + ezFee + campCost) / totalPur : 0;
+  const attPct = w.reg > 0 ? w.att / w.reg : 0;
+  const convPct = w.att > 0 ? w.pur / w.att : 0;
+  return { price, totalPur, rev, ccFee, ezFee, campCost, platCost, totalCost, profit, cac, attPct, convPct };
+}
+
+// ─────────────────────────────────────────────────────
+// Render
+// ─────────────────────────────────────────────────────
+function renderWeeks() {
+  const container = document.getElementById('weeksContainer');
+  container.innerHTML = '';
+
+  weeks.forEach((week, wi) => {
+    const weekTotReg = week.webinars.reduce((s, w) => s + (w.reg || 0), 0);
+    const div = document.createElement('div');
+    div.className = 'week-block';
+
+    // Header
+    div.innerHTML = `
+      <div class="week-header">
+        <span class="week-badge">${week.label}</span>
+        <label>עלות לליד שבועית ₪</label>
+        <input class="cpl-input" type="number" value="${week.costPerLead}"
+          oninput="weeks[${wi}].costPerLead=+this.value;recalcAll()">
+        <span class="cpl-note">= עלות קמפיין ÷ נרשמים</span>
+        <button class="add-wb-btn" onclick="addWebinar(${wi})">＋ וובינר</button>
+        ${weeks.length > 1 ? `<button class="del-week-btn" onclick="deleteWeek(${wi})">🗑</button>` : ''}
+      </div>
+
+      <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th rowspan="2" style="width:28px;"></th>
+            <!-- Funnel -->
+            <th colspan="7" class="sec-header sec-funnel">📊 משפך וובינר</th>
+            <!-- Extra purchases -->
+            <th colspan="5" class="sec-header sec-extra">➕ רכישות נוספות</th>
+            <!-- Finance -->
+            <th colspan="7" class="sec-header sec-finance">💰 פיננסי</th>
+          </tr>
+          <tr>
+            <th class="input-h">שם</th>
+            <th class="input-h">תאריך</th>
+            <th class="input-h">שעה</th>
+            <th class="input-h">נרשמים</th>
+            <th class="input-h">משתתפים</th>
+            <th class="calc-h">% הגעה</th>
+            <th class="input-h">רכישות</th>
+            <th class="calc-h">% המרה</th>
+            <!-- extra -->
+            <th class="extra-h">מהקלטה</th>
+            <th class="extra-h">שיחות מכירה</th>
+            <th class="extra-h">מחוץ לוובינר</th>
+            <th class="extra-h">סה"כ חודשי</th>
+            <!-- finance -->
+            <th class="fin-h">הכנסה ללא מע"מ</th>
+            <th class="fin-h">עמלת סליקה</th>
+            <th class="fin-h">עמלת EZ</th>
+            <th class="fin-h">עלות קמפיין</th>
+            <th class="input-h">פלטפורמות ₪</th>
+            <th class="total-h">רווח/הפסד</th>
+            <th class="total-h">CAC</th>
+          </tr>
+        </thead>
+        <tbody>${buildRows(week.webinars, wi, weekTotReg, week.costPerLead)}</tbody>
+        ${buildFoot(week.webinars, wi, weekTotReg, week.costPerLead)}
+      </table>
+      </div>`;
+
+    container.appendChild(div);
+  });
+}
+
+function buildRows(webinars, wi, weekTotReg, cpl) {
+  return webinars.map((w, bi) => {
+    const c = calcRow(w, weekTotReg, cpl);
+    const profCls = c.profit >= 0 ? 'profit-pos' : 'profit-neg';
+    return `
+      <tr>
+        <td><button class="del-row-btn" onclick="deleteWebinar(${wi},${bi})" title="מחק">✕</button></td>
+        <td><input class="name-in" value="${w.name}" oninput="weeks[${wi}].webinars[${bi}].name=this.value;recalcAll()"></td>
+        <td><input type="date" value="${w.date}" oninput="weeks[${wi}].webinars[${bi}].date=this.value;recalcAll()"></td>
+        <td><input class="time-in" type="text" placeholder="שעה" value="${w.time}" oninput="weeks[${wi}].webinars[${bi}].time=this.value;recalcAll()"></td>
+        <td><input type="number" value="${w.reg||''}" placeholder="0" oninput="weeks[${wi}].webinars[${bi}].reg=+this.value;recalcAll()"></td>
+        <td><input type="number" value="${w.att||''}" placeholder="0" oninput="weeks[${wi}].webinars[${bi}].att=+this.value;recalcAll()"></td>
+        <td class="calc-cell pct-cell">${w.reg ? fmtP(c.attPct) : '—'}</td>
+        <td><input type="number" value="${w.pur||''}" placeholder="0" oninput="weeks[${wi}].webinars[${bi}].pur=+this.value;recalcAll()"></td>
+        <td class="calc-cell bold-blue">${w.att ? fmtP(c.convPct) : '—'}</td>
+        <!-- extra -->
+        <td><input class="extra-in" type="number" value="${w.recPur||''}" placeholder="0" oninput="weeks[${wi}].webinars[${bi}].recPur=+this.value;recalcAll()"></td>
+        <td><input class="extra-in" type="number" value="${w.callPur||''}" placeholder="0" oninput="weeks[${wi}].webinars[${bi}].callPur=+this.value;recalcAll()"></td>
+        <td><input class="extra-in" type="number" value="${w.extPur||''}" placeholder="0" oninput="weeks[${wi}].webinars[${bi}].extPur=+this.value;recalcAll()"></td>
+        <td class="calc-cell money-green">${c.totalPur > 0 ? fmtN(c.totalPur) + ' רכישות' : '—'}</td>
+        <!-- finance -->
+        <td class="calc-cell money-green">${c.totalPur > 0 ? fmt(c.rev) : '—'}</td>
+        <td class="calc-cell">${c.totalPur > 0 ? fmt(c.ccFee) : '—'}</td>
+        <td class="calc-cell">${(w.pur + w.recPur) > 0 ? fmt(c.ezFee) : '—'}</td>
+        <td class="calc-cell">${w.reg && cpl > 0 ? fmt(c.campCost) : '—'}</td>
+        <td><input type="number" value="${w.platCost||''}" placeholder="0" oninput="weeks[${wi}].webinars[${bi}].platCost=+this.value;recalcAll()"></td>
+        <td class="calc-cell ${profCls}">${c.totalPur > 0 || cpl > 0 || w.platCost > 0 ? fmt(c.profit) : '—'}</td>
+        <td class="calc-cell cac-cell">${c.totalPur > 0 ? fmt(c.cac) : '—'}</td>
+      </tr>`;
+  }).join('');
+}
+
+function buildFoot(webinars, wi, weekTotReg, cpl) {
+  let totReg=0, totAtt=0, totPur=0, totRecPur=0, totCallPur=0, totExtPur=0;
+  let totRev=0, totCcFee=0, totEz=0, totCamp=0, totPlat=0, totProfit=0;
+
+  webinars.forEach(w => {
+    const c = calcRow(w, weekTotReg, cpl);
+    totReg+=w.reg||0; totAtt+=w.att||0; totPur+=w.pur||0;
+    totRecPur+=w.recPur||0; totCallPur+=w.callPur||0; totExtPur+=w.extPur||0;
+    totRev+=c.rev; totCcFee+=c.ccFee; totEz+=c.ezFee;
+    totCamp+=c.campCost; totPlat+=c.platCost; totProfit+=c.profit;
+  });
+  const totTotal = totPur + totRecPur + totCallPur + totExtPur;
+  const totCac = totTotal > 0 ? (totCcFee + totEz + totCamp) / totTotal : 0;
+  const attPct = totReg > 0 ? totAtt/totReg : 0;
+  const convPct = totAtt > 0 ? totPur/totAtt : 0;
+  const profCls = totProfit >= 0 ? 'tf-profit-pos' : 'tf-profit-neg';
+
+  return `<tfoot><tr>
+    <td></td>
+    <td colspan="3">סה"כ שבוע</td>
+    <td>${fmtN(totReg)}</td>
+    <td>${fmtN(totAtt)}</td>
+    <td>${fmtP(attPct)}</td>
+    <td>${fmtN(totPur)}</td>
+    <td>${fmtP(convPct)}</td>
+    <td class="tf-green">${fmtN(totRecPur)}</td>
+    <td class="tf-green">${fmtN(totCallPur)}</td>
+    <td class="tf-green">${fmtN(totExtPur)}</td>
+    <td class="tf-green">${fmtN(totTotal)} רכישות</td>
+    <td class="tf-green">${fmt(totRev)}</td>
+    <td>${fmt(totCcFee)}</td>
+    <td>${fmt(totEz)}</td>
+    <td>${fmt(totCamp)}</td>
+    <td>${fmt(totPlat)}</td>
+    <td class="${profCls}">${fmt(totProfit)}</td>
+    <td>${fmt(totCac)}</td>
+  </tr></tfoot>`;
+}
+
+// ─────────────────────────────────────────────────────
+// KPIs
+// ─────────────────────────────────────────────────────
+function updateKPIs() {
+  let totReg=0, totAtt=0, totPur=0, totAll=0, totRev=0, totProfit=0;
+  let totCcFee=0, totCamp=0, totEz=0;
+
+  weeks.forEach(week => {
+    const wtr = week.webinars.reduce((s,w)=>s+(w.reg||0),0);
+    week.webinars.forEach(w => {
+      const c = calcRow(w, wtr, week.costPerLead);
+      totReg+=w.reg||0; totAtt+=w.att||0; totPur+=w.pur||0;
+      totAll+=c.totalPur; totRev+=c.rev; totProfit+=c.profit;
+      totCcFee+=c.ccFee; totCamp+=c.campCost; totEz+=c.ezFee;
+    });
+  });
+
+  document.getElementById('k_reg').textContent = fmtN(totReg);
+  document.getElementById('k_att').textContent = fmtN(totAtt);
+  document.getElementById('k_att_p').textContent = totReg > 0 ? fmtP(totAtt/totReg) + ' הגעה' : '—';
+  document.getElementById('k_pur').textContent = fmtN(totPur);
+  document.getElementById('k_total_pur').textContent = fmtN(totAll);
+  document.getElementById('k_rev').textContent = fmt(totRev);
+  document.getElementById('k_profit').textContent = fmt(totProfit);
+  document.getElementById('k_profit').style.color = totProfit >= 0 ? '#059669' : '#dc2626';
+  document.getElementById('k_profit_card').style.borderTopColor = totProfit >= 0 ? '#10b981' : '#ef4444';
+  const cac = totAll > 0 ? (totCcFee + totCamp + totEz) / totAll : 0;
+  document.getElementById('k_cac').textContent = fmt(cac);
+  const conv = totAtt > 0 ? totPur/totAtt : 0;
+  document.getElementById('k_conv').textContent = fmtP(conv);
+}
+
+// ─────────────────────────────────────────────────────
+// Funnel chart
+// ─────────────────────────────────────────────────────
+function updateFunnel() {
+  let totReg=0, totAtt=0, totPur=0, totAll=0;
+  weeks.forEach(week => {
+    const wtr = week.webinars.reduce((s,w)=>s+(w.reg||0),0);
+    week.webinars.forEach(w => {
+      const c = calcRow(w, wtr, week.costPerLead);
+      totReg+=w.reg||0; totAtt+=w.att||0; totPur+=w.pur||0; totAll+=c.totalPur;
+    });
+  });
+  const stages = [
+    { label: 'נרשמים לוובינר', val: totReg, color: '#3b82f6' },
+    { label: 'משתתפים', val: totAtt, color: '#8b5cf6' },
+    { label: 'רכישות וובינר', val: totPur, color: '#f59e0b' },
+    { label: 'סה"כ לקוחות', val: totAll, color: '#10b981' },
+  ];
+  const max = stages[0].val || 1;
+  document.getElementById('funnelDiv').innerHTML = stages.map(s => {
+    const pct = (s.val / max * 100).toFixed(0);
+    const sub = s !== stages[0] && stages[0].val > 0 ? `(${(s.val/stages[0].val*100).toFixed(1)}%)` : '';
+    return `<div class="funnel-stage">
+      <div class="funnel-label">${s.label}</div>
+      <div class="funnel-bar-wrap">
+        <div class="funnel-bar" style="width:${pct}%;background:${s.color}">
+          <span>${fmtN(s.val)}</span>
+        </div>
+      </div>
+      <div class="funnel-pct">${sub}</div>
+    </div>`;
+  }).join('');
+}
+
+// ─────────────────────────────────────────────────────
+// Cost pie
+// ─────────────────────────────────────────────────────
+function updateCostPie() {
+  let totCcFee=0, totCamp=0, totEz=0, totPlat=0;
+  weeks.forEach(week => {
+    const wtr = week.webinars.reduce((s,w)=>s+(w.reg||0),0);
+    week.webinars.forEach(w => {
+      const c = calcRow(w, wtr, week.costPerLead);
+      totCcFee+=c.ccFee; totCamp+=c.campCost; totEz+=c.ezFee; totPlat+=c.platCost;
+    });
+  });
+  const data = {
+    labels: ['קמפיין', 'EZ', 'פלטפורמות', 'סליקה'],
+    datasets: [{
+      data: [totCamp, totEz, totPlat, totCcFee],
+      backgroundColor: ['#3b82f6','#8b5cf6','#14b8a6','#ef4444'],
+      borderWidth: 2, borderColor: '#fff'
+    }]
+  };
+  if (costPieInst) costPieInst.destroy();
+  costPieInst = new Chart(document.getElementById('costPie'), {
+    type: 'doughnut', data,
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 8 } },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${fmt(ctx.raw)}` } }
+      }
+    }
+  });
+}
+
+// ─────────────────────────────────────────────────────
+// Profit bar
+// ─────────────────────────────────────────────────────
+function updateProfitBar() {
+  const labels = [], profits = [], colors = [];
+  weeks.forEach(week => {
+    const wtr = week.webinars.reduce((s,w)=>s+(w.reg||0),0);
+    week.webinars.forEach(w => {
+      const c = calcRow(w, wtr, week.costPerLead);
+      const dateStr = w.date ? new Date(w.date).toLocaleDateString('he-IL', {day:'numeric',month:'numeric'}) : '';
+      labels.push(w.name + (dateStr ? '\n'+dateStr : ''));
+      profits.push(Math.round(c.profit));
+      colors.push(c.profit >= 0 ? '#10b981' : '#ef4444');
+    });
+  });
+  if (profitBarInst) profitBarInst.destroy();
+  profitBarInst = new Chart(document.getElementById('profitBar'), {
+    type: 'bar',
+    data: { labels, datasets: [{ data: profits, backgroundColor: colors, borderRadius: 5 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${fmt(ctx.raw)}` } } },
+      scales: {
+        y: { ticks: { callback: v => fmt(v), font: { size: 10 } } },
+        x: { ticks: { font: { size: 10 } } }
+      }
+    }
+  });
+}
+
+// ─────────────────────────────────────────────────────
+// Add / Delete
+// ─────────────────────────────────────────────────────
+function addWeek() {
+  const totWB = weeks.reduce((s,w)=>s+w.webinars.length,0);
+  weeks.push({
+    id: nextWeekId++, label: 'שבוע ' + (weeks.length + 1), costPerLead: 0,
+    webinars: [{ name: 'וובינר '+(totWB+1), date: '', time: '', reg:0, att:0, pur:0, recPur:0, callPur:0, extPur:0, platCost:0 }]
+  });
+  recalcAll();
+}
+
+function addWebinar(wi) {
+  const totWB = weeks.reduce((s,w)=>s+w.webinars.length,0);
+  weeks[wi].webinars.push({ name:'וובינר '+(totWB+1), date:'', time:'', reg:0, att:0, pur:0, recPur:0, callPur:0, extPur:0, platCost:0 });
+  recalcAll();
+}
+
+function deleteWeek(wi) {
+  if (weeks.length <= 1) return;
+  if (confirm('למחוק ' + weeks[wi].label + '?')) { weeks.splice(wi,1); recalcAll(); }
+}
+
+function deleteWebinar(wi, bi) {
+  if (weeks[wi].webinars.length <= 1) return;
+  weeks[wi].webinars.splice(bi,1); recalcAll();
+}
+
+// ─────────────────────────────────────────────────────
+// Main
+// ─────────────────────────────────────────────────────
+function recalcAll() {
+  renderWeeks();
+  updateKPIs();
+  updateFunnel();
+  updateCostPie();
+  updateProfitBar();
+  document.getElementById('lastUpdated').textContent = 'עודכן: ' + new Date().toLocaleTimeString('he-IL');
+}
+
+recalcAll();
+</script>
+</body>
+</html>
