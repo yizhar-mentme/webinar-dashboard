@@ -583,8 +583,12 @@
     .flow-timing { padding:14px 12px; background:#fafaf8; font-size:11px; color:#666; font-weight:600; border-left:1px solid #f0f0ec; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:3px; }
     .flow-timing-num { width:22px; height:22px; border-radius:50%; background:#e8e8e4; color:#555; font-size:10px; font-weight:800; display:flex; align-items:center; justify-content:center; margin-bottom:4px; }
     .flow-content { padding:12px 14px; }
-    .flow-msg-text { font-size:12px; color:#222; line-height:1.5; margin-bottom:8px; }
-    .flow-msg-text strong { color:#111; }
+    .wa-bubble-wrap { background:#ece5dd; border-radius:10px; padding:10px 12px; max-width:280px; }
+    .wa-bubble { background:#fff; border-radius:8px 8px 8px 0; padding:9px 11px; font-size:12px; color:#111; line-height:1.55; position:relative; box-shadow:0 1px 2px rgba(0,0,0,.12); }
+    .wa-bubble::after { content:''; position:absolute; bottom:0; right:100%; border:6px solid transparent; border-bottom-color:#fff; border-right-color:#fff; }
+    .wa-bubble-time { font-size:10px; color:#999; text-align:left; margin-top:4px; }
+    .wa-bubble-btn { background:#fff; border:1px solid #25d366; border-radius:6px; padding:6px 12px; font-size:11px; color:#128c7e; font-weight:600; text-align:center; margin-top:4px; display:block; }
+    .wa-bubble-link { background:#fff; border:1px solid #ddd; border-radius:6px; padding:6px 12px; font-size:11px; color:#128c7e; font-weight:600; text-align:center; margin-top:4px; display:block; }
     .flow-btn-tag { display:inline-block; background:#e8f5e9; color:#1b5e20; border:1px solid #a5d6a7; border-radius:6px; font-size:10px; padding:2px 7px; margin-left:4px; margin-bottom:3px; }
     .flow-stats { padding:12px 14px; display:flex; flex-direction:column; gap:6px; align-items:flex-end; justify-content:center; min-width:130px; }
     .flow-stat-row { display:flex; align-items:center; gap:6px; font-size:11px; color:#555; white-space:nowrap; }
@@ -610,8 +614,11 @@
           <span>אחרי</span>
         </div>
         <div class="flow-content">
-          <div class="flow-msg-text">"שמחתי לך שנרשמת, אבל כנראה שלא הסתדר לך הפעם 😊 נפתחה אפשרות להרשמה למועד נוסף"</div>
-          <span class="flow-btn-tag">🔗 למועד הבא</span>
+          <div class="wa-bubble-wrap">
+            <div class="wa-bubble">היי<br>שמחתי לך שנרשמת להדרכה, אבל כנראה שלא הסתדר לך להצטרף הפעם 😊<br><br>נפתחה אפשרות להרשמה למועד נוסף דרך הקישור מטה.<br>דוד</div>
+            <div class="wa-bubble-time">11:48 am ✓✓</div>
+            <a class="wa-bubble-link">🔗 למועד הבא</a>
+          </div>
         </div>
         <div class="flow-stats">
           <div class="flow-stat-row"><span class="flow-stat-icon">👁️</span><span>נשלח: <strong>1,575</strong></span></div>
@@ -639,8 +646,10 @@
           <span>אחרי</span>
         </div>
         <div class="flow-content">
-          <div class="flow-msg-text">"ראינו שהתחלת לצפות בהדרכה, אבל לא הספקת לסיים. לא נורא — ההקלטה המלאה בדרך אליך 😊 אם יש שאלות — אפשר לרשום כאן"</div>
-          <span style="font-size:10px;color:#aaa">ללא כפתורים</span>
+          <div class="wa-bubble-wrap">
+            <div class="wa-bubble">היי<br>ראינו שהתחלת לצפות בהדרכה, אבל לא הספקת לסיים אותה.<br>לא נורא - בקרוב תישלח אליך ההקלטה המלאה של ההדרכה.<br>ובנתיים, אם יש לך שאלות אלינו - אפשר לרשום כאן ונחזור אליך 😊</div>
+            <div class="wa-bubble-time">11:48 am ✓✓</div>
+          </div>
         </div>
         <div class="flow-stats">
           <div class="flow-stat-row"><span class="flow-stat-icon">👁️</span><span>נשלח: <strong>137</strong></span></div>
@@ -655,7 +664,10 @@
           <span>9:00–17:00</span>
         </div>
         <div class="flow-content">
-          <div class="flow-msg-text">"בהמשך להרשמה שלך — ההקלטה זמינה לזמן מוגבל. כולל ההטבה שניתנה בשידור 🎁"<br><span style="font-size:10px;color:#888">קישור ההקלטה מוטבע בהודעה</span></div>
+          <div class="wa-bubble-wrap">
+            <div class="wa-bubble">היי<br>בהמשך להרשמה שלך להדרכה, ההקלטה זמינה לצפייה לזמן מוגבל.<br>כולל ההטבה שניתנה בשידור 🎁<br>אפשר לצפות בה דרך הקישור הבא:<br><span style="color:#128c7e">▶ קישור להקלטה</span><br>בהצלחה</div>
+            <div class="wa-bubble-time">11:48 am ✓✓</div>
+          </div>
         </div>
         <div class="flow-stats">
           <div class="flow-stat-row"><span class="flow-stat-icon">👁️</span><span>נשלח: <strong>103</strong></span></div>
@@ -683,9 +695,12 @@
           <span>בוקר</span>
         </div>
         <div class="flow-content">
-          <div class="flow-msg-text"><strong>ניני (callback):</strong> "היי, ראיתי שהיית בהדרכה ורציתי לבדוק אם יש שאלות לגבי התוכנית או הליווי 😊"</div>
-          <span class="flow-btn-tag">💬 אשמח לשיחה</span>
-          <span class="flow-btn-tag">✋ אין שאלות, הכל טוב</span>
+          <div class="wa-bubble-wrap">
+            <div class="wa-bubble">היי 😊<br>כאן ניני ממנטמי<br>ראיתי שהיית בהדרכה ורציתי לבדוק אם נשארו לך שאלות לגבי התוכנית או הליווי<br>להסרה השב הסר</div>
+            <div class="wa-bubble-time">11:48 am ✓✓</div>
+            <a class="wa-bubble-btn">↩ אשמח לשיחה</a>
+            <a class="wa-bubble-btn">↩ אין שאלות, הכל טוב</a>
+          </div>
         </div>
         <div class="flow-stats">
           <div class="flow-stat-row"><span class="flow-stat-icon">📖</span><span>קריאה: <span class="rate-pill hi">73% ⭐</span></span></div>
@@ -700,8 +715,11 @@
           <span>19–21:00</span>
         </div>
         <div class="flow-content">
-          <div class="flow-msg-text">"בקרוב תישלח אליך הקלטת ההדרכה. מצורף גם סרטון קצר עם סיפורים וניסיון של בוגרים שיתפו מה עזר להם לאורך הדרך"</div>
-          <span class="flow-btn-tag">🎬 לצפייה</span>
+          <div class="wa-bubble-wrap">
+            <div class="wa-bubble">היי {{שם}}<br>בקרוב תישלח אליך הקלטת ההדרכה. מקווה שלקחת לפחות דבר אחד ליישום מיידי.<br>מצורף גם סרטון קצר עם סיפורים וניסיון של אנשים שעברו תהליכי חיפוש עבודה איתנו ושיתפו מה עזר להם לאורך הדרך.<br>להסרה השב הסר</div>
+            <div class="wa-bubble-time">11:48 am ✓✓</div>
+            <a class="wa-bubble-link">🔗 לצפייה</a>
+          </div>
         </div>
         <div class="flow-stats">
           <div class="flow-stat-row"><span class="flow-stat-icon">👁️</span><span>נשלח: <strong>240</strong></span></div>
@@ -716,7 +734,10 @@
           <span>08:00</span>
         </div>
         <div class="flow-content">
-          <div class="flow-msg-text">"הלוואי שמישהו היה אומר לי כשחיפשתי עבודה את מה שסיון אומרת פה 🎥 מצרף את הקלטת ההדרכה — זמינה עד ראשון"<br><span style="font-size:10px;color:#888">קישור מוטבע בטקסט</span></div>
+          <div class="wa-bubble-wrap">
+            <div class="wa-bubble">היי {{שם}}<br>הלוואי שמישהו היה אומר לי, כשחיפשתי עבודה, את מה שסיון אומרת פה אגב 🎥<br>מצרף לך כאן את הקלטת ההדרכה.<br>ההקלטה זמינה לצפייה עד יום ראשון<br><span style="color:#128c7e">▶ קישור להקלטה</span><br>שבת שלום!</div>
+            <div class="wa-bubble-time">08:00 ✓✓</div>
+          </div>
         </div>
         <div class="flow-stats">
           <div class="flow-stat-row"><span class="flow-stat-icon">👁️</span><span>נשלח: <strong>278</strong></span></div>
@@ -731,7 +752,10 @@
           <span>20:40</span>
         </div>
         <div class="flow-content">
-          <div class="flow-msg-text">"שבוע טוב! רק מזכיר — הקלטת ההדרכה נשלחה אתמול. זמינה לצפייה רק עד מחר בערב ⭐ מצרף את הקישור שוב"<br><span style="font-size:10px;color:#888">קישור מוטבע בטקסט</span></div>
+          <div class="wa-bubble-wrap">
+            <div class="wa-bubble">היי<br>שבוע טוב! רק מזכיר שהקלטת ההדרכה נשלחה אתמול.<br>זמינה לצפייה רק עד מחר בערב.<br>מצרף את הקישור גם כאן:<br><span style="color:#128c7e">▶ קישור להקלטה</span><br>שיהיה שבוע שקט ומוצלח ✨</div>
+            <div class="wa-bubble-time">20:40 ✓✓</div>
+          </div>
         </div>
         <div class="flow-stats">
           <div class="flow-stat-row"><span class="flow-stat-icon">👁️</span><span>נשלח: <strong>263</strong></span></div>
@@ -746,8 +770,11 @@
           <span>14:30</span>
         </div>
         <div class="flow-content">
-          <div class="flow-msg-text">"הרבה שאלו אותי על חוויות לקוחות שלנו — מצרף קישור לביקורות בגוגל 🙏 ומזכיר שההקלטה פגה הלילה"</div>
-          <span class="flow-btn-tag">⭐ מה אומרים עלינו</span>
+          <div class="wa-bubble-wrap">
+            <div class="wa-bubble">היי<br>הרבה שאלו אותי על חוויות של לקוחות שלנו. מצרף קישור לביקורות שלהם עלינו בגוגל.<br>ומזכיר שהקלטת ההדרכה זמינה רק עד היום בערב, למקרה שעוד לא צפית 🙏</div>
+            <div class="wa-bubble-time">14:30 ✓✓</div>
+            <a class="wa-bubble-link">⭐ מה אומרים עלינו</a>
+          </div>
         </div>
         <div class="flow-stats">
           <div class="flow-stat-row"><span class="flow-stat-icon">👁️</span><span>נשלח: <strong>151</strong></span></div>
