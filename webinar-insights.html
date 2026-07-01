@@ -565,211 +565,197 @@
 
   <!-- ===================== END OF NEW FLOWS SECTION ===================== -->
 
-  <!-- MESSAGE BREAKDOWN BY GROUP -->
-  <div class="section-label">הודעות לפי קבוצה — מה נשלח, מתי, כמה פתחו</div>
+  <!-- MESSAGE FLOW BY GROUP -->
+  <div class="section-label">פלואו הודעות לפי קבוצה — תוכן · קריאה · הקלקה</div>
 
   <style>
-    .msg-table { width:100%; border-collapse:collapse; font-size:12px; margin-bottom:4px; }
-    .msg-table th { background:#f8f8f6; padding:7px 10px; text-align:right; font-size:10px; font-weight:700; color:#888; text-transform:uppercase; border-bottom:2px solid #e8e8e4; }
-    .msg-table td { padding:8px 10px; border-bottom:1px solid #f0f0ec; vertical-align:middle; }
-    .msg-table tr:last-child td { border-bottom:none; }
-    .msg-table tr:hover td { background:#fafaf8; }
     .rate-pill { display:inline-block; padding:2px 9px; border-radius:99px; font-size:11px; font-weight:700; }
     .rate-pill.hi  { background:#dcfce7; color:#16a34a; }
     .rate-pill.mid { background:#fef3c7; color:#d97706; }
     .rate-pill.lo  { background:#fee2e2; color:#dc2626; }
-    .msg-group-card { background:#fff; border-radius:12px; border:1px solid #e8e8e4; margin-bottom:14px; overflow:hidden; }
-    .msg-group-header { display:flex; align-items:center; gap:10px; padding:12px 16px; border-bottom:1px solid #f0f0ec; }
-    .msg-group-title { font-size:13px; font-weight:700; }
-    .msg-group-sub { font-size:11px; color:#888; margin-top:1px; }
-    .msg-content { font-size:11px; color:#555; max-width:300px; line-height:1.4; }
-    .msg-action { font-size:11px; }
+    .flow-section { margin-bottom:20px; }
+    .flow-header { display:flex; align-items:center; gap:10px; padding:10px 16px; border-radius:10px 10px 0 0; border:1px solid #e8e8e4; border-bottom:none; }
+    .flow-header-title { font-size:13px; font-weight:700; }
+    .flow-header-sub { font-size:11px; color:#888; margin-top:1px; }
+    .flow-body { border:1px solid #e8e8e4; border-radius:0 0 10px 10px; background:#fff; overflow:hidden; }
+    .flow-msg-row { display:grid; grid-template-columns:90px 1fr auto; gap:0; border-bottom:1px solid #f4f4f0; }
+    .flow-msg-row:last-child { border-bottom:none; }
+    .flow-timing { padding:14px 12px; background:#fafaf8; font-size:11px; color:#666; font-weight:600; border-left:1px solid #f0f0ec; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:3px; }
+    .flow-timing-num { width:22px; height:22px; border-radius:50%; background:#e8e8e4; color:#555; font-size:10px; font-weight:800; display:flex; align-items:center; justify-content:center; margin-bottom:4px; }
+    .flow-content { padding:12px 14px; }
+    .flow-msg-text { font-size:12px; color:#222; line-height:1.5; margin-bottom:8px; }
+    .flow-msg-text strong { color:#111; }
+    .flow-btn-tag { display:inline-block; background:#e8f5e9; color:#1b5e20; border:1px solid #a5d6a7; border-radius:6px; font-size:10px; padding:2px 7px; margin-left:4px; margin-bottom:3px; }
+    .flow-stats { padding:12px 14px; display:flex; flex-direction:column; gap:6px; align-items:flex-end; justify-content:center; min-width:130px; }
+    .flow-stat-row { display:flex; align-items:center; gap:6px; font-size:11px; color:#555; white-space:nowrap; }
+    .flow-stat-icon { font-size:13px; }
+    .flow-click-row { background:#f0fdf4; border-radius:6px; padding:4px 8px; font-size:11px; color:#166534; font-weight:600; white-space:nowrap; }
+    .flow-no-click { font-size:10px; color:#aaa; }
   </style>
 
-  <!-- 50% GROUP -->
-  <div class="msg-group-card">
-    <div class="msg-group-header" style="background:#fffbeb">
-      <span style="font-size:22px">⏱️</span>
+  <!-- NOT ATTENDED FLOW -->
+  <div class="flow-section">
+    <div class="flow-header" style="background:#fef2f2">
+      <span style="font-size:20px">😴</span>
       <div>
-        <div class="msg-group-title">50% צפייה — 198 אנשים · 5 הודעות</div>
-        <div class="msg-group-sub">ראו חצי מהוובינר. לא שמעו את הפיץ'.</div>
+        <div class="flow-header-title">לא הגיעו לוובינר — 1,575 אנשים · 1 הודעה</div>
+        <div class="flow-header-sub">נרשמו אבל לא הצטרפו. מטרה: להחזיר למועד הבא.</div>
       </div>
     </div>
-    <table class="msg-table">
-      <thead><tr><th>#</th><th>תזמון</th><th>תוכן ההודעה</th><th>נמסר</th><th>Read Rate</th><th>פעולות / תוצאה</th></tr></thead>
-      <tbody>
-        <tr>
-          <td><strong>1</strong></td>
-          <td style="white-space:nowrap">מיד אחרי</td>
-          <td class="msg-content">ניני: "ראיתי שהיית בהדרכה, רציתי לבדוק אם יש שאלות" + 2 כפתורים</td>
-          <td>198</td>
-          <td><span class="rate-pill hi">63%</span></td>
-          <td class="msg-action">👍 אשמח לשיחה: <strong>22*</strong><br>✋ אין שאלות: <strong>101*</strong></td>
-        </tr>
-        <tr>
-          <td><strong>2</strong></td>
-          <td style="white-space:nowrap">בוקר למחרת</td>
-          <td class="msg-content">חומרים + עדויות בוגרים</td>
-          <td>93</td>
-          <td><span class="rate-pill hi">69% ⭐</span></td>
-          <td class="msg-action" style="color:#16a34a">הכי גבוה בקבוצה</td>
-        </tr>
-        <tr>
-          <td><strong>3</strong></td>
-          <td style="white-space:nowrap">יום שישי</td>
-          <td class="msg-content">ההקלטה פתוחה עד ראשון בערב + קישור</td>
-          <td>106</td>
-          <td><span class="rate-pill hi">64%</span></td>
-          <td class="msg-action">—</td>
-        </tr>
-        <tr>
-          <td><strong>4</strong></td>
-          <td style="white-space:nowrap">מוצ"ש 20:40</td>
-          <td class="msg-content">תזכורת — ההקלטה עדיין פתוחה</td>
-          <td>98</td>
-          <td><span class="rate-pill mid">57%</span></td>
-          <td class="msg-action" style="color:#d97706">מתחיל לרדת</td>
-        </tr>
-        <tr style="background:#fff5f5">
-          <td><strong>5</strong></td>
-          <td style="white-space:nowrap">ראשון ערב</td>
-          <td class="msg-content">הלילה נסגר ⏰ + עדויות</td>
-          <td>90</td>
-          <td><span class="rate-pill lo">50% 📉</span></td>
-          <td class="msg-action" style="color:#dc2626">הכי נמוך · 0 רכישות</td>
-        </tr>
-      </tbody>
-    </table>
-    <div style="padding:8px 16px;font-size:11px;color:#92400e;background:#fffbeb">* 22 + 101 הם מ-50%+75%+100% ביחד</div>
+    <div class="flow-body">
+      <div class="flow-msg-row">
+        <div class="flow-timing">
+          <div class="flow-timing-num" style="background:#fecaca;color:#991b1b">1</div>
+          <span>מיד</span>
+          <span>אחרי</span>
+        </div>
+        <div class="flow-content">
+          <div class="flow-msg-text">"שמחתי לך שנרשמת, אבל כנראה שלא הסתדר לך הפעם 😊 נפתחה אפשרות להרשמה למועד נוסף"</div>
+          <span class="flow-btn-tag">🔗 למועד הבא</span>
+        </div>
+        <div class="flow-stats">
+          <div class="flow-stat-row"><span class="flow-stat-icon">👁️</span><span>נשלח: <strong>1,575</strong></span></div>
+          <div class="flow-stat-row"><span class="flow-stat-icon">📖</span><span>קריאה: <span class="rate-pill mid">50.3%</span></span></div>
+          <div class="flow-click-row">✅ 122 נרשמו מחדש (7.7%)</div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- 75% GROUP -->
-  <div class="msg-group-card">
-    <div class="msg-group-header" style="background:#f0fdf4">
-      <span style="font-size:22px">🔥</span>
+  <!-- 25% FLOW -->
+  <div class="flow-section">
+    <div class="flow-header" style="background:#fffbeb">
+      <span style="font-size:20px">⏱️</span>
       <div>
-        <div class="msg-group-title">75% צפייה — 96 אנשים · 6 הודעות</div>
-        <div class="msg-group-sub">ראו כמעט הכול. יצאו לפני ההצעה.</div>
+        <div class="flow-header-title">25% צפייה — 137 אנשים · 2 הודעות</div>
+        <div class="flow-header-sub">נכנסו ויצאו מוקדם. לא ראו את התוכן המרכזי.</div>
       </div>
     </div>
-    <table class="msg-table">
-      <thead><tr><th>#</th><th>תזמון</th><th>תוכן ההודעה</th><th>נמסר</th><th>Read Rate</th><th>פעולות / תוצאה</th></tr></thead>
-      <tbody>
-        <tr>
-          <td><strong>1</strong></td>
-          <td style="white-space:nowrap">מיד אחרי</td>
-          <td class="msg-content">הקלטה + בונוס מאיץ 80/20</td>
-          <td>96</td>
-          <td><span class="rate-pill hi">72% ⭐</span></td>
-          <td class="msg-action">בונוס יוצר סיבה לפתוח</td>
-        </tr>
-        <tr>
-          <td><strong>2</strong></td>
-          <td style="white-space:nowrap">3 שעות אחרי</td>
-          <td class="msg-content">ניני: "ראיתי שהיית בהדרכה..." + 2 כפתורים</td>
-          <td>63</td>
-          <td><span class="rate-pill hi">73% ⭐⭐</span></td>
-          <td class="msg-action" style="color:#16a34a">הכי גבוה בכל הזרימות!</td>
-        </tr>
-        <tr>
-          <td><strong>3</strong></td>
-          <td style="white-space:nowrap">למחרת</td>
-          <td class="msg-content">עדויות בוגרים</td>
-          <td>18</td>
-          <td><span class="rate-pill hi">72%</span></td>
-          <td class="msg-action">—</td>
-        </tr>
-        <tr>
-          <td><strong>4</strong></td>
-          <td style="white-space:nowrap">יום שישי</td>
-          <td class="msg-content">ההקלטה פתוחה + קישור</td>
-          <td>25</td>
-          <td><span class="rate-pill hi">68%</span></td>
-          <td class="msg-action">—</td>
-        </tr>
-        <tr>
-          <td><strong>5</strong></td>
-          <td style="white-space:nowrap">מוצ"ש 20:40</td>
-          <td class="msg-content">תזכורת — ההקלטה עדיין פתוחה</td>
-          <td>22</td>
-          <td><span class="rate-pill hi">64%</span></td>
-          <td class="msg-action">—</td>
-        </tr>
-        <tr style="background:#fff5f5">
-          <td><strong>6</strong></td>
-          <td style="white-space:nowrap">ראשון ערב</td>
-          <td class="msg-content">הלילה נסגר ⏰ + עדויות</td>
-          <td>21</td>
-          <td><span class="rate-pill lo">52% 📉</span></td>
-          <td class="msg-action" style="color:#dc2626">עייפות — שקול להוריד</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="flow-body">
+      <div class="flow-msg-row">
+        <div class="flow-timing">
+          <div class="flow-timing-num" style="background:#fde68a;color:#92400e">1</div>
+          <span>מיד</span>
+          <span>אחרי</span>
+        </div>
+        <div class="flow-content">
+          <div class="flow-msg-text">"ראינו שהתחלת לצפות בהדרכה, אבל לא הספקת לסיים. לא נורא — ההקלטה המלאה בדרך אליך 😊 אם יש שאלות — אפשר לרשום כאן"</div>
+          <span style="font-size:10px;color:#aaa">ללא כפתורים</span>
+        </div>
+        <div class="flow-stats">
+          <div class="flow-stat-row"><span class="flow-stat-icon">👁️</span><span>נשלח: <strong>137</strong></span></div>
+          <div class="flow-stat-row"><span class="flow-stat-icon">📖</span><span>קריאה: <span class="rate-pill hi">60.6%</span></span></div>
+          <div class="flow-no-click">אין נתוני קליק</div>
+        </div>
+      </div>
+      <div class="flow-msg-row">
+        <div class="flow-timing">
+          <div class="flow-timing-num" style="background:#fde68a;color:#92400e">2</div>
+          <span>למחרת</span>
+          <span>9:00–17:00</span>
+        </div>
+        <div class="flow-content">
+          <div class="flow-msg-text">"בהמשך להרשמה שלך — ההקלטה זמינה לזמן מוגבל. כולל ההטבה שניתנה בשידור 🎁"<br><span style="font-size:10px;color:#888">קישור ההקלטה מוטבע בהודעה</span></div>
+        </div>
+        <div class="flow-stats">
+          <div class="flow-stat-row"><span class="flow-stat-icon">👁️</span><span>נשלח: <strong>103</strong></span></div>
+          <div class="flow-stat-row"><span class="flow-stat-icon">📖</span><span>קריאה: <span class="rate-pill mid">55.3%</span></span></div>
+          <div class="flow-click-row">🔗 264 לחצו על ההקלטה</div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- 100% GROUP -->
-  <div class="msg-group-card" style="border-color:#7c3aed">
-    <div class="msg-group-header" style="background:#faf5ff">
-      <span style="font-size:22px">💎</span>
+  <!-- 50%+75%+100% SHARED FLOW -->
+  <div class="flow-section">
+    <div class="flow-header" style="background:#f0f9ff">
+      <span style="font-size:20px">🎯</span>
       <div>
-        <div class="msg-group-title">100% צפייה — 146 אנשים · 6 הודעות</div>
-        <div class="msg-group-sub">ראו הכול כולל הפיץ'. הקהל הכי חם.</div>
+        <div class="flow-header-title">50% + 75% + 100% צפייה — פלואו משותף · 5 הודעות</div>
+        <div class="flow-header-sub">ראו לפחות חצי מהוובינר. מקבלים את אותן הודעות מ-יום א' עד ראשון.</div>
       </div>
     </div>
-    <table class="msg-table">
-      <thead><tr><th>#</th><th>תזמון</th><th>תוכן ההודעה</th><th>נמסר</th><th>Read Rate</th><th>פעולות / תוצאה</th></tr></thead>
-      <tbody>
-        <tr>
-          <td><strong>1</strong></td>
-          <td style="white-space:nowrap">מיד אחרי</td>
-          <td class="msg-content">הקלטה + בונוס סורק AI + קישור רכישה</td>
-          <td>146</td>
-          <td><span class="rate-pill hi">69%</span></td>
-          <td class="msg-action">—</td>
-        </tr>
-        <tr>
-          <td><strong>2</strong></td>
-          <td style="white-space:nowrap">3 שעות אחרי</td>
-          <td class="msg-content">ניני: "ראיתי שהיית בהדרכה..." + 2 כפתורים</td>
-          <td>103</td>
-          <td><span class="rate-pill hi">63%</span></td>
-          <td class="msg-action">👍 22 ביקשו שיחה*<br>✋ 101 אין שאלות*</td>
-        </tr>
-        <tr style="background:#f0fdf4">
-          <td><strong>3</strong></td>
-          <td style="white-space:nowrap">למחרת ערב</td>
-          <td class="msg-content">עדויות בוגרים + קישור</td>
-          <td>146</td>
-          <td><span class="rate-pill hi">77% ⭐⭐</span></td>
-          <td class="msg-action" style="color:#16a34a">הכי גבוה מכל ההודעות בכל הזרימות</td>
-        </tr>
-        <tr>
-          <td><strong>4</strong></td>
-          <td style="white-space:nowrap">יום שישי</td>
-          <td class="msg-content">ההקלטה פתוחה + קישור</td>
-          <td>146</td>
-          <td><span class="rate-pill hi">73%</span></td>
-          <td class="msg-action">—</td>
-        </tr>
-        <tr>
-          <td><strong>5</strong></td>
-          <td style="white-space:nowrap">מוצ"ש 20:40</td>
-          <td class="msg-content">תזכורת — ההקלטה עדיין פתוחה</td>
-          <td>146</td>
-          <td><span class="rate-pill hi">66%</span></td>
-          <td class="msg-action">—</td>
-        </tr>
-        <tr style="background:#fff7ed">
-          <td><strong>6</strong></td>
-          <td style="white-space:nowrap">ראשון ערב</td>
-          <td class="msg-content">הלילה נסגר ⏰ + עדויות</td>
-          <td>146</td>
-          <td><span class="rate-pill mid">53%</span></td>
-          <td class="msg-action" style="color:#7c3aed"><strong>29 לחצו הצעה (19%)</strong></td>
-        </tr>
-      </tbody>
-    </table>
-    <div style="padding:8px 16px;font-size:11px;color:#92400e;background:#fffbeb">* 22 + 101 הם מ-50%+75%+100% ביחד</div>
+    <div class="flow-body">
+      <div class="flow-msg-row">
+        <div class="flow-timing">
+          <div class="flow-timing-num" style="background:#bfdbfe;color:#1e3a8a">1</div>
+          <span>יום א'</span>
+          <span>בוקר</span>
+        </div>
+        <div class="flow-content">
+          <div class="flow-msg-text"><strong>ניני (callback):</strong> "היי, ראיתי שהיית בהדרכה ורציתי לבדוק אם יש שאלות לגבי התוכנית או הליווי 😊"</div>
+          <span class="flow-btn-tag">💬 אשמח לשיחה</span>
+          <span class="flow-btn-tag">✋ אין שאלות, הכל טוב</span>
+        </div>
+        <div class="flow-stats">
+          <div class="flow-stat-row"><span class="flow-stat-icon">📖</span><span>קריאה: <span class="rate-pill hi">73% ⭐</span></span></div>
+          <div class="flow-click-row">💬 29 אשמח לשיחה</div>
+          <div class="flow-click-row" style="background:#f1f5f9;color:#475569">✋ 115 אין שאלות</div>
+        </div>
+      </div>
+      <div class="flow-msg-row">
+        <div class="flow-timing">
+          <div class="flow-timing-num" style="background:#bfdbfe;color:#1e3a8a">2</div>
+          <span>יום א'</span>
+          <span>19–21:00</span>
+        </div>
+        <div class="flow-content">
+          <div class="flow-msg-text">"בקרוב תישלח אליך הקלטת ההדרכה. מצורף גם סרטון קצר עם סיפורים וניסיון של בוגרים שיתפו מה עזר להם לאורך הדרך"</div>
+          <span class="flow-btn-tag">🎬 לצפייה</span>
+        </div>
+        <div class="flow-stats">
+          <div class="flow-stat-row"><span class="flow-stat-icon">👁️</span><span>נשלח: <strong>240</strong></span></div>
+          <div class="flow-stat-row"><span class="flow-stat-icon">📖</span><span>קריאה: <span class="rate-pill mid">58%</span></span></div>
+          <div class="flow-click-row">🎬 21 לחצו לצפייה (8.75%)</div>
+        </div>
+      </div>
+      <div class="flow-msg-row">
+        <div class="flow-timing">
+          <div class="flow-timing-num" style="background:#bfdbfe;color:#1e3a8a">3</div>
+          <span>שישי</span>
+          <span>08:00</span>
+        </div>
+        <div class="flow-content">
+          <div class="flow-msg-text">"הלוואי שמישהו היה אומר לי כשחיפשתי עבודה את מה שסיון אומרת פה 🎥 מצרף את הקלטת ההדרכה — זמינה עד ראשון"<br><span style="font-size:10px;color:#888">קישור מוטבע בטקסט</span></div>
+        </div>
+        <div class="flow-stats">
+          <div class="flow-stat-row"><span class="flow-stat-icon">👁️</span><span>נשלח: <strong>278</strong></span></div>
+          <div class="flow-stat-row"><span class="flow-stat-icon">📖</span><span>קריאה: <span class="rate-pill hi">64.7%</span></span></div>
+          <div class="flow-no-click">קישור מוטבע — אין tracking</div>
+        </div>
+      </div>
+      <div class="flow-msg-row">
+        <div class="flow-timing">
+          <div class="flow-timing-num" style="background:#bfdbfe;color:#1e3a8a">4</div>
+          <span>מוצ"ש</span>
+          <span>20:40</span>
+        </div>
+        <div class="flow-content">
+          <div class="flow-msg-text">"שבוע טוב! רק מזכיר — הקלטת ההדרכה נשלחה אתמול. זמינה לצפייה רק עד מחר בערב ⭐ מצרף את הקישור שוב"<br><span style="font-size:10px;color:#888">קישור מוטבע בטקסט</span></div>
+        </div>
+        <div class="flow-stats">
+          <div class="flow-stat-row"><span class="flow-stat-icon">👁️</span><span>נשלח: <strong>263</strong></span></div>
+          <div class="flow-stat-row"><span class="flow-stat-icon">📖</span><span>קריאה: <span class="rate-pill mid">58.9%</span></span></div>
+          <div class="flow-no-click">קישור מוטבע — אין tracking</div>
+        </div>
+      </div>
+      <div class="flow-msg-row" style="background:#fffbeb">
+        <div class="flow-timing">
+          <div class="flow-timing-num" style="background:#bfdbfe;color:#1e3a8a">5</div>
+          <span>ראשון</span>
+          <span>14:30</span>
+        </div>
+        <div class="flow-content">
+          <div class="flow-msg-text">"הרבה שאלו אותי על חוויות לקוחות שלנו — מצרף קישור לביקורות בגוגל 🙏 ומזכיר שההקלטה פגה הלילה"</div>
+          <span class="flow-btn-tag">⭐ מה אומרים עלינו</span>
+        </div>
+        <div class="flow-stats">
+          <div class="flow-stat-row"><span class="flow-stat-icon">👁️</span><span>נשלח: <strong>151</strong></span></div>
+          <div class="flow-stat-row"><span class="flow-stat-icon">📖</span><span>קריאה: <span class="rate-pill lo">50.3% 📉</span></span></div>
+          <div class="flow-no-click">אין נתוני קליק</div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- MONTHLY TREND -->
